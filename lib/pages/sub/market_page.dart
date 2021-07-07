@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:traveler/data/iap.dart';
 import 'package:traveler/data/images.dart';
 import 'package:traveler/language/language.dart';
 
@@ -39,7 +40,10 @@ class _MarketPageState extends State<MarketPage> {
 
   Future<void> verifyPurchase(PurchaseDetails purchaseDetails) async {
     if (purchaseDetails.productID == removeAdsId) {
-    } else if (purchaseDetails.productID == reloadQuicknessId) {}
+      IAP.buyRemoveAds();
+    } else if (purchaseDetails.productID == reloadQuicknessId) {
+      IAP.buyReloadQuickness();
+    }
   }
 
   void initalizeIAP() async {
@@ -77,11 +81,9 @@ class _MarketPageState extends State<MarketPage> {
         } else if (purchaseDetails.status == PurchaseStatus.purchased ||
             purchaseDetails.status == PurchaseStatus.restored) {
           await verifyPurchase(purchaseDetails);
-          print("Ödül ikame edildi.");
         }
         if (purchaseDetails.pendingCompletePurchase) {
           await InAppPurchase.instance.completePurchase(purchaseDetails);
-          print("Satın alım tamamlandı..");
         }
       }
     });

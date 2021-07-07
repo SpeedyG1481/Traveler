@@ -80,6 +80,9 @@ class Language {
   static String gamesPlayed;
   static String countOfTrues;
   static String countOfFalses;
+  static String noHealthTitle;
+  static String doYouWantToWatchAd;
+  static String watch;
 
   static String warningSelectProvince;
   static String warningMaximumUploadSize;
@@ -198,6 +201,9 @@ class Language {
     gamesPlayed = map["GamesPlayed"];
     countOfTrues = map["CountOfTrues"];
     countOfFalses = map["CountOfFalses"];
+    noHealthTitle = map["NoHealthTitle"];
+    doYouWantToWatchAd = map["DoYouWantToWatchAd"];
+    watch = map["Watch"];
 
     warningSelectProvince = map["WarningSelectProvince"];
     warningMaximumUploadSize = map["WarningMaximumUploadSize"];

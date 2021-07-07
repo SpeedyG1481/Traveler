@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:traveler/pages/intro/splash_screen.dart';
 
@@ -13,7 +14,8 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  //await SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
+  await SystemChrome.setEnabledSystemUIOverlays([]);
+  await MobileAds.instance.initialize();
 
   if (defaultTargetPlatform == TargetPlatform.android) {
     InAppPurchaseAndroidPlatformAddition.enablePendingPurchases();

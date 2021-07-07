@@ -9,9 +9,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:traveler/components/standart_text_field.dart';
+import 'package:traveler/data/ads.dart';
 import 'package:traveler/data/func.dart';
 import 'package:traveler/data/images.dart';
 import 'package:traveler/language/language.dart';
@@ -28,12 +30,43 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  InterstitialAd profileInterstitial;
+
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
   TextEditingController usernameController = TextEditingController();
 
+  Future loadAd() async {
+    InterstitialAd.load(
+      adUnitId: Ads.getProfileInterstitialId(),
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          this.profileInterstitial = ad;
+          showAd();
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print("AD Error: " + error.message);
+        },
+      ),
+    );
+  }
+
+  Future showAd() async {
+    if (this.profileInterstitial != null) {
+      await this.profileInterstitial.show();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (profileInterstitial != null) profileInterstitial.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
+    this.loadAd();
     super.initState();
   }
 

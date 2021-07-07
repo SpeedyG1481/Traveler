@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:traveler/data/ads.dart';
 import 'package:traveler/data/constants.dart';
 import 'package:traveler/data/health_system.dart';
 import 'package:traveler/data/images.dart';
@@ -27,9 +30,11 @@ class ModeSelectionPage extends StatefulWidget {
 
 class _ModeSelectionPageState extends State<ModeSelectionPage> {
   Timer timer;
+  RewardedAd rewardedAd;
 
   @override
   void dispose() {
+    if (rewardedAd != null) rewardedAd.dispose();
     if (timer != null) timer.cancel();
     timer = null;
     super.dispose();
@@ -189,8 +194,8 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
                   children: [
                     GestureDetector(
                       onTap: () async {
-                        if (await HealthSystem.canPlay() ||
-                            Constants.debugMode) {
+                        if (await HealthSystem
+                            .canPlay() /*|| Constants.debugMode*/) {
                           HealthSystem.play();
                           Navigator.pushAndRemoveUntil(
                             context,
@@ -201,6 +206,37 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
                             (Route<dynamic> route) => false,
                           );
                         } else {
+                          AwesomeDialog(
+                            btnOkText: Language.watch,
+                            btnCancelText: Language.cancel,
+                            context: context,
+                            dialogType: DialogType.INFO,
+                            animType: AnimType.BOTTOMSLIDE,
+                            title: Language.noHealthTitle,
+                            desc: Language.doYouWantToWatchAd,
+                            btnOkOnPress: () async {
+                              await RewardedAd.load(
+                                adUnitId: Ads.getFastLoadHealthRewardedId(),
+                                request: AdRequest(),
+                                rewardedAdLoadCallback: RewardedAdLoadCallback(
+                                  onAdLoaded: (RewardedAd ad) {
+                                    rewardedAd = ad;
+                                    rewardedAd.show(onUserEarnedReward:
+                                        (RewardedAd ad, RewardItem reward) {
+                                      setState(() {
+                                        HealthSystem.addHealth();
+                                      });
+                                    });
+                                  },
+                                  onAdFailedToLoad: (LoadAdError error) {
+                                    print("AD error: " + error.message);
+                                  },
+                                ),
+                              );
+                            },
+                            btnCancelOnPress: () {},
+                          )..show();
+
                           Fluttertoast.showToast(msg: Language.noHealthForGame);
                         }
                       },

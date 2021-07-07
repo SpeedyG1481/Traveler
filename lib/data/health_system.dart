@@ -21,6 +21,15 @@ class HealthSystem {
     await preferences.setInt("Health", health);
   }
 
+  static Future<void> addHealth({int count = 1}) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    int health = preferences.getInt("Health");
+    if (health == null) health = count;
+    if (health < 0) health = 0;
+    health += count;
+    await preferences.setInt("Health", health);
+  }
+
   static Future<void> setTimer() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     int currentSavedTime = preferences.getInt("FillTime");

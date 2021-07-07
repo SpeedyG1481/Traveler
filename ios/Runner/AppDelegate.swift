@@ -2,6 +2,7 @@ import UIKit
 import Flutter
 import GoogleMaps
 import Firebase
+import GoogleMobileAds
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -11,6 +12,7 @@ import Firebase
   ) -> Bool {
     GMSServices.provideAPIKey("AIzaSyBGu10TRG_e6OZQ4zBg4Im4zRj2pd3a8J0")
     GeneratedPluginRegistrant.register(with: self)
+    GADMobileAds.sharedInstance().start(completionHandler: nil)
     FirebaseApp.configure()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

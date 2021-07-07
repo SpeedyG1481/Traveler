@@ -1,8 +1,8 @@
 name: traveler
-description: A travel program.
+description: Real traveler game!
 
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -42,6 +42,7 @@ dependencies:
   email_validator: ^2.0.1
   firebase_storage: ^9.0.0
   cloud_firestore: ^2.3.0
+  google_mobile_ads: ^0.13.2
 
 dev_dependencies:
   flutter_launcher_icons:

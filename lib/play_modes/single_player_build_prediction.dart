@@ -6,8 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:traveler/audio/audio_controller.dart';
+import 'package:traveler/data/ads.dart';
 import 'package:traveler/data/audio_files.dart';
 import 'package:traveler/data/constants.dart';
 import 'package:traveler/data/data_model.dart';
@@ -28,6 +30,8 @@ class SinglePlayerBuildPrediction extends StatefulWidget {
 
 class _SinglePlayerBuildPredictionState
     extends State<SinglePlayerBuildPrediction> {
+  InterstitialAd playGameInterstitial;
+
   DateTime currentBackPressTime;
 
   List<Question> questions = [];
@@ -49,8 +53,31 @@ class _SinglePlayerBuildPredictionState
   int trueCount = 0;
   int falseCount = 0;
 
+  Future loadAd() async {
+    InterstitialAd.load(
+      adUnitId: Ads.getPlayGameInterstitialId(),
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          this.playGameInterstitial = ad;
+          showAd();
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print("AD Error: " + error.message);
+        },
+      ),
+    );
+  }
+
+  Future showAd() async {
+    if (this.playGameInterstitial != null) {
+      await this.playGameInterstitial.show();
+    }
+  }
+
   @override
   void dispose() {
+    if (playGameInterstitial != null) playGameInterstitial.dispose();
     if (timer != null) timer.cancel();
     timer = null;
     super.dispose();
@@ -59,6 +86,7 @@ class _SinglePlayerBuildPredictionState
   @override
   void initState() {
     super.initState();
+    this.loadAd();
     loadQuestions();
     AudioController.stopBackgroundMusic();
   }
@@ -417,7 +445,7 @@ class _SinglePlayerBuildPredictionState
                 ? indexOfSelected == index
                     ? Border.all(
                         color: Colors.white,
-                        width: 2,
+                        width: 5,
                       )
                     : null
                 : null,
@@ -586,9 +614,10 @@ class _SinglePlayerBuildPredictionState
         }
 
         if (!isEnded()) {
-          setState(() {
-            time++;
-          });
+          if (mounted)
+            setState(() {
+              time++;
+            });
 
           if (roundTimer - time <= 0) {
             nextRound();

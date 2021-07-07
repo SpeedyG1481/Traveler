@@ -9,11 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:traveler/components/mega_dropdown.dart';
+import 'package:traveler/data/ads.dart';
 import 'package:traveler/data/constants.dart';
 import 'package:traveler/data/data_model.dart';
 import 'package:traveler/data/database_controller.dart';
@@ -35,6 +37,8 @@ class UploadPage extends StatefulWidget {
 }
 
 class _UploadPageState extends State<UploadPage> {
+  InterstitialAd promoteCityInterstitial;
+
   PickedFile uploadimage;
   Future<Uint8List> image;
 
@@ -47,10 +51,39 @@ class _UploadPageState extends State<UploadPage> {
   bool uploadStatus = false;
   bool lastUploadStatus = false;
 
+  Future loadAd() async {
+    InterstitialAd.load(
+      adUnitId: Ads.getPromoteCityInterstitialId(),
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          this.promoteCityInterstitial = ad;
+          showAd();
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print("AD Error: " + error.message);
+        },
+      ),
+    );
+  }
+
+  Future showAd() async {
+    if (this.promoteCityInterstitial != null) {
+      await this.promoteCityInterstitial.show();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (promoteCityInterstitial != null) promoteCityInterstitial.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
-    super.initState();
+    this.loadAd();
     firstUpload();
+    super.initState();
   }
 
   @override
