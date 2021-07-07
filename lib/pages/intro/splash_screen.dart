@@ -16,16 +16,6 @@ class FirstSplashScreen extends StatefulWidget {
 
 class FirstSplashScreenState extends State<FirstSplashScreen> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SplashScreen(

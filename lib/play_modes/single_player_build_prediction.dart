@@ -1,25 +1,21 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:traveler/audio/audio_controller.dart';
-import 'package:traveler/components/save_score_text_field.dart';
 import 'package:traveler/data/audio_files.dart';
 import 'package:traveler/data/constants.dart';
 import 'package:traveler/data/data_model.dart';
 import 'package:traveler/data/database_controller.dart';
-import 'package:traveler/data/func.dart';
+import 'package:traveler/data/images.dart';
 import 'package:traveler/language/language.dart';
 import 'package:traveler/models/city.dart';
 import 'package:traveler/models/country.dart';
-import 'package:traveler/models/meter_types.dart';
 import 'package:traveler/models/question.dart';
 import 'package:traveler/models/state.dart';
 import 'package:traveler/pages/main_page.dart';
@@ -32,15 +28,10 @@ class SinglePlayerBuildPrediction extends StatefulWidget {
 
 class _SinglePlayerBuildPredictionState
     extends State<SinglePlayerBuildPrediction> {
-  TextEditingController controller = TextEditingController();
-
   DateTime currentBackPressTime;
 
-  Completer<GoogleMapController> _controller = Completer();
-  static Marker selectMarker = Marker(markerId: MarkerId("marker"));
-
-  List<Question> questions;
-  bool isLoading = false;
+  List<Question> questions = [];
+  bool isLoading = true;
   Timer timer;
 
   int round = 0;
@@ -48,9 +39,15 @@ class _SinglePlayerBuildPredictionState
 
   int time = 0;
   int roundTimer = 0;
+  int freezeCounter = 0;
 
-  bool saving = false;
-  bool canSave = true;
+  int indexOfSelected = 0;
+  int trueAnswerIndex = 0;
+
+  bool freeze = false;
+
+  int trueCount = 0;
+  int falseCount = 0;
 
   @override
   void dispose() {
@@ -66,108 +63,122 @@ class _SinglePlayerBuildPredictionState
     AudioController.stopBackgroundMusic();
   }
 
-  var _markers = Set<Marker>.of([selectMarker]);
+  bool isEnded() =>
+      this.round >= Constants.BuildPredictionSinglePlayerRoundCount;
 
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
     return WillPopScope(
       onWillPop: onWillPop,
       child: Scaffold(
+        backgroundColor: Color(0xff1D85F8),
         body: SafeArea(
-          child: Stack(
+          child: Column(
             children: [
-              getBody(),
-              Positioned(
-                top: 0,
-                right: width / 4,
-                child: Container(
-                  width: width / 2,
-                  height: height / 10,
-                  decoration: BoxDecoration(
-                    color: Color(0xffD0F3F7),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(
-                        20,
-                      ),
-                      bottomRight: Radius.circular(
-                        20,
-                      ),
-                    ),
+              if (!isEnded())
+                Container(
+                  padding: EdgeInsets.only(
+                    top: 3,
+                    bottom: 3,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  width: width,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Color(0xff066DBC),
+                  ),
+                  child: Column(
                     children: [
-                      if (round <
-                          Constants.BuildPredictionSinglePlayerRoundCount)
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            (round + 1).toString() +
-                                "/" +
-                                Constants.BuildPredictionSinglePlayerRoundCount
-                                    .toString(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Color(0xff1683DB),
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      if (round <
-                          Constants.BuildPredictionSinglePlayerRoundCount)
-                        Expanded(
-                          child: Text(
-                            (roundTimer - time).toString(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Color(0xff1683DB),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
                       Expanded(
-                        flex: 2,
-                        child: Text(
-                          point.toString(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color(0xff1683DB),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 18),
+                        child: Row(
+                          children: [
+                            if (!isEnded())
+                              Expanded(
+                                flex: 2,
+                                child: Icon(
+                                  MdiIcons.star,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            if (!isEnded())
+                              Expanded(
+                                child: Icon(
+                                  MdiIcons.timerSand,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            Expanded(
+                              flex: 2,
+                              child: Icon(
+                                MdiIcons.chevronTripleUp,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (!isEnded())
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  (round + 1).toString() +
+                                      "/" +
+                                      questions.length.toString(),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            if (!isEnded())
+                              Expanded(
+                                child: Text(
+                                  (roundTimer - time).toString(),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 25,
+                                  ),
+                                ),
+                              ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                point.toString(),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
+              Expanded(
+                child: Container(
+                  child: getBody(),
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: Images.playGameBackground,
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
               ),
             ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if (round >= Constants.BuildPredictionSinglePlayerRoundCount) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                CupertinoPageRoute(
-                  builder: (context) => ParentMainPage(),
-                ),
-                (Route<dynamic> route) => false,
-              );
-              return;
-            }
-            selectDialog(width, height);
-          },
-          backgroundColor: Color(0xffD0F3F7),
-          child: Icon(
-            round >= Constants.BuildPredictionSinglePlayerRoundCount
-                ? MdiIcons.arrowLeft
-                : MdiIcons.mapMarker,
-            color: Color(0xff1683DB),
           ),
         ),
       ),
@@ -175,229 +186,270 @@ class _SinglePlayerBuildPredictionState
   }
 
   getBody() {
-    double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
     if (isLoading || !(this.questions != null))
-      return Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          color: Colors.white,
+        ),
+      );
 
     if (this.questions.length == 0) {
       return Center(
         child: Text(
           Language.noDataFound,
           textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+            fontSize: 18,
+          ),
         ),
       );
     }
 
-    if (round < Constants.BuildPredictionSinglePlayerRoundCount &&
-        round < this.questions.length)
-      return Container(
-        height: height,
-        width: width,
-        child: Image(
-          fit: BoxFit.fill,
-          image: NetworkImage(
-            this.questions[round].photoUrl,
+    if (isEnded())
+      return Center(
+        child: Container(
+          width: width / 1.35,
+          padding: EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 8,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                Language.pointBig,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 50,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                point.toString(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 40,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(
+                height: 35,
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        returnMainPage();
+                      },
+                      child: CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          MdiIcons.home,
+                          color: Color(0xff066DBC),
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       );
-
-    return Stack(
-      children: [
-        Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            color: Color(0xff000000),
+    else
+      return Column(
+        children: [
+          SizedBox(
+            height: 20,
           ),
-          child: Image(
-            fit: BoxFit.fill,
-            image: NetworkImage(
-              this.questions[min(round, this.questions.length - 1)].photoUrl,
-            ),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          bottom: 0,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 7.5,
-            ),
-            decoration: BoxDecoration(
-              color: Color(0xffD0F3F7).withOpacity(
-                .85,
-              ),
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(
-                  10,
-                ),
-              ),
-            ),
-            child: Text(
-              "© " +
-                  this
-                      .questions[min(round, this.questions.length - 1)]
-                      .uploaderName,
-              style: TextStyle(
-                color: Color(
-                  0xff00276B,
-                ),
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ),
-        Center(
-          child: !canSave
-              ? Container()
-              : Container(
+          Expanded(
+            flex: 5,
+            child: Stack(
+              children: [
+                Container(
+                  width: width / 1.1,
                   decoration: BoxDecoration(
-                    color: Color(0xffD0F3F7),
+                    border: Border.all(
+                      color: Color(0xff066DBC),
+                      width: 5,
+                    ),
+                    color: Color(0xff066DBC),
                     borderRadius: BorderRadius.circular(
                       20,
                     ),
-                  ),
-                  width: width / 1.35,
-                  height: height / 3,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 8,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        Language.doYouWantToSaveScore,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(
-                            0xff00276B,
-                          ),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    image: DecorationImage(
+                      fit: BoxFit.fill,
+                      image: NetworkImage(
+                        this
+                            .questions[min(round, this.questions.length - 1)]
+                            .photoUrl,
                       ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      SaveScoreTextField(
-                        editingController: controller,
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      GestureDetector(
-                        onTap: () async {
-                          setState(
-                            () {
-                              saving = true;
-                            },
-                          );
-                          await saveScore();
-                          setState(
-                            () {
-                              saving = false;
-                            },
-                          );
-                        },
-                        child: !saving
-                            ? CircleAvatar(
-                                backgroundColor: Color(
-                                  0xff00276B,
-                                ),
-                                child: Icon(
-                                  MdiIcons.checkBold,
-                                  size: 30,
-                                  color: Color(0xffD0F3F7),
-                                ),
-                              )
-                            : SpinKitWave(
-                                size: 30,
-                                color: Color(0xffD0F3F7),
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-        ),
-      ],
-    );
-  }
-
-  void selectDialog(double width, double height) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: StatefulBuilder(
-              builder: (context, innerSetState) {
-                return Container(
-                  width: width * .9,
-                  height: height * .9,
-                  child: GoogleMap(
-                    mapType: MapType.terrain,
-                    markers: _markers,
-                    onTap: (LatLng lng) {
-                      innerSetState(() {
-                        selectMarker =
-                            selectMarker.copyWith(positionParam: lng);
-                        _markers.clear();
-                        _markers.add(selectMarker);
-                      });
-                    },
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(0, 0),
-                      zoom: 0,
                     ),
-                    mapToolbarEnabled: false,
-                    onMapCreated: (GoogleMapController controller) {
-                      _controller.complete(controller);
-                    },
                   ),
-                );
-              },
+                ),
+                Positioned(
+                  top: 4,
+                  left: 4,
+                  child: Image(
+                    height: 30,
+                    image: Images.playGameTopLeftDecoration2,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  child: Image(
+                    height: 50,
+                    image: Images.playGameGallery,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Image(
+                    height: 35,
+                    image: Images.playGameCamera,
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Image(
+                    height: 35,
+                    image: Images.playGameMarker,
+                  ),
+                ),
+              ],
             ),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  check(context);
-                },
-                child: Text(
-                  Language.checkDistance,
-                ),
+          ),
+          Container(
+            padding: EdgeInsets.all(
+              10,
+            ),
+            child: Text(
+              Language.whereIsHere,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 40,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  Language.cancel,
-                ),
+            ),
+          ),
+          Expanded(
+            flex: 7,
+            child: Container(
+              padding: EdgeInsets.all(
+                10,
               ),
-            ],
-          );
-        });
+              child: Column(
+                children: getAnswers(),
+              ),
+            ),
+          ),
+        ],
+      );
   }
 
-  void check(BuildContext context) {
-    Navigator.pop(context);
-    if (selectMarker != null && this.questions.length > 0) {
-      City questionState = questions[round].city;
-      MeterTypes meterTypes = Functions.distanceBetween(
-          selectMarker.position.latitude,
-          selectMarker.position.longitude,
-          questionState.latitude,
-          questionState.longitude);
-      if (round <
-          min(Constants.BuildPredictionSinglePlayerRoundCount,
-              this.questions.length)) {
-        nextRound(meterTypes: meterTypes);
+  List<Widget> getAnswers() {
+    List<Widget> widgetList = [];
+
+    Question question = this.questions[round];
+    int i = 0;
+    for (City answer in question.allAnswers) {
+      bool isTrueAnswer = answer.id == question.city.id;
+      if (isTrueAnswer) {
+        trueAnswerIndex = i;
       }
+      widgetList.add(getAnswer(
+          i,
+          isTrueAnswer,
+          answer.name +
+              " / " +
+              answer.state.name +
+              " / " +
+              answer.country.name));
+      if (i != question.allAnswers.length - 1)
+        widgetList.add(SizedBox(
+          height: 15,
+        ));
+      i++;
     }
+
+    return widgetList;
+  }
+
+  getAnswer(int index, bool isTrue, String name) {
+    double width = MediaQuery.of(context).size.width;
+    return Expanded(
+      child: InkWell(
+        splashColor: Colors.white,
+        borderRadius: BorderRadius.circular(
+          21,
+        ),
+        onTap: () {
+          if (freeze) return;
+          setState(() {
+            indexOfSelected = index;
+            freeze = true;
+          });
+          if (indexOfSelected == trueAnswerIndex) {
+            trueCount++;
+          } else {
+            falseCount++;
+          }
+        },
+        child: Container(
+          width: width / 1.2,
+          padding: EdgeInsets.symmetric(
+            horizontal: 10,
+          ),
+          decoration: BoxDecoration(
+            border: freeze
+                ? indexOfSelected == index
+                    ? Border.all(
+                        color: Colors.white,
+                        width: 2,
+                      )
+                    : null
+                : null,
+            image: DecorationImage(
+              image: Images.answerBackground,
+              fit: BoxFit.fill,
+            ),
+            borderRadius: BorderRadius.circular(
+              21,
+            ),
+          ),
+          height: 50,
+          child: Center(
+            child: Text(
+              name,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                // freeze
+                //     ? indexOfSelected == index
+                //         ? Colors.white
+                //         : Color(0xff066DBC)
+                //     : Color(0xff066DBC),
+                fontWeight: FontWeight.w500,
+                fontStyle: FontStyle.italic,
+                fontSize: 20,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future loadQuestions() async {
@@ -408,9 +460,32 @@ class _SinglePlayerBuildPredictionState
             Constants.BuildPredictionSinglePlayerRoundCount.toString());
     this.questions = [];
     for (Map m in dataModel.data) {
+      DataModel dataModel = await DatabaseController.query(
+          "SELECT cities.*, states.name as stateName, countries.name as countryName FROM "
+                  "cities, states, countries WHERE "
+                  "cities.state_id = states.id AND "
+                  "countries.id = cities.country_id AND "
+                  "cities.id != " +
+              m["id"] +
+              " ORDER BY RAND() LIMIT 4");
+      List<City> cities = [];
+      for (Map map in dataModel.data) {
+        cities.add(
+          City.fromMap(
+            map,
+            country: Country(
+              name: map["countryName"],
+            ),
+            state: Province(
+              name: map["stateName"],
+            ),
+          ),
+        );
+      }
       this.questions.add(
             Question.fromMap(
               m,
+              otherAnswers: cities,
               city: City.fromMap(
                 m,
                 state: Province(
@@ -430,170 +505,87 @@ class _SinglePlayerBuildPredictionState
     });
   }
 
-  void nextRound({MeterTypes meterTypes}) {
-    if (meterTypes != null) {
-      Question question = this.questions[min(round, this.questions.length - 1)];
-      AwesomeDialog(
-        context: context,
-        dialogType: DialogType.INFO_REVERSED,
-        animType: AnimType.SCALE,
-        title: Language.accuary,
-        body: Column(
-          children: [
-            Text(
-              Language.tourInfo,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              Language.cityName + ": " + question.city.name,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(
-              height: 5,
-            ),
-            Text(
-              Language.stateName + ": " + question.city.state.name,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(
-              height: 5,
-            ),
-            Text(
-              Language.countryName + ": " + question.city.country.name,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            Text(
-              Language.mistakeCount +
-                  ": " +
-                  meterTypes.externalKm.toString() +
-                  " km " +
-                  meterTypes.externalMt.toString() +
-                  " mt ",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              Language.wonPoint + ": " + meterTypes.point.toString(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 15.5,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        btnOkOnPress: () {},
-      )..show();
-
-      if (meterTypes.externalKm < Constants.BuildPredictionSuccessLevels[0]) {
-        AudioController.playSoundEffect(AudioFiles.SuccessHighSound);
-      } else if (meterTypes.externalKm <
-          Constants.BuildPredictionSuccessLevels[1]) {
-        AudioController.playSoundEffect(AudioFiles.SuccessMediumSound);
-      } else if (meterTypes.externalKm <
-          Constants.BuildPredictionSuccessLevels[2]) {
-        AudioController.playSoundEffect(AudioFiles.SuccessLowSound);
+  void nextRound({bool isTrue}) {
+    if (isTrue != null) {
+      if (isTrue) {
+        AudioController.playSoundEffect(AudioFiles.TrueSound);
+        // Increase point
+        point += roundTimer - time;
       } else {
-        AudioController.playSoundEffect(AudioFiles.SuccessVeryLowSound);
+        AudioController.playSoundEffect(AudioFiles.FalseSound);
+        // Dont edit point
       }
-      point += meterTypes.point;
     } else {
       Fluttertoast.showToast(
         msg: Language.noMoreTimes,
       );
-      AudioController.playSoundEffect(AudioFiles.WrongSound);
+      AudioController.playSoundEffect(AudioFiles.FalseSound);
     }
 
     roundTimer = time + Constants.BuildPredictionSinglePlayerQuestionTimer;
     setState(() {
       round++;
     });
+
     if (round == Constants.BuildPredictionSinglePlayerRoundCount) {
       AudioController.playSoundEffect(AudioFiles.LevelEnd);
+
+      FirebaseAuth.instance.authStateChanges().listen((user) async {
+        if (user != null) {
+          DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+              await FirebaseFirestore.instance
+                  .collection("userdata")
+                  .doc(user.uid)
+                  .get();
+          Map map = documentSnapshot.data();
+
+          int playCount = map["play_count"];
+          int maxPoint = map["maximum_point"];
+          int totalPoint = map["total_point"];
+          int countOfTrue = map["true_answers"];
+          int countOfFalse = map["false_answers"];
+
+          if (point > maxPoint) {
+            maxPoint = point;
+          }
+          countOfTrue += trueCount;
+          countOfFalse += falseCount;
+          playCount++;
+          totalPoint += point;
+          map["play_count"] = playCount;
+          map["maximum_point"] = maxPoint;
+          map["total_point"] = totalPoint;
+          map["true_answers"] = countOfTrue;
+          map["false_answers"] = countOfFalse;
+
+          await FirebaseFirestore.instance
+              .collection("userdata")
+              .doc(user.uid)
+              .update(map);
+        }
+      });
     }
-  }
-
-  saveScore() async {
-    String text = controller.text;
-
-    if (text.length < 3) {
-      Fluttertoast.showToast(msg: Language.minimumThreeCharacterForSaveToTable);
-      return;
-    }
-
-    Response response = await post(
-      Uri.parse(Constants.newScoreUrl),
-      body: {
-        "name": text,
-        "score": point.toString(),
-        "securityToken": Constants.securityToken
-      },
-    );
-    if (response.body == "true" || response.body == "1") {
-      AwesomeDialog(
-        btnOkText: Language.okey,
-        context: context,
-        dialogType: DialogType.SUCCES,
-        animType: AnimType.BOTTOMSLIDE,
-        title: Language.success,
-        desc: Language.saveSuccessToTable,
-        btnOkOnPress: () {},
-      )..show();
-    } else {
-      AwesomeDialog(
-        btnOkText: Language.okey,
-        context: context,
-        dialogType: DialogType.ERROR,
-        animType: AnimType.BOTTOMSLIDE,
-        title: Language.error,
-        desc: Language.saveErrorToTable,
-        btnOkOnPress: () {},
-      )..show();
-    }
-
-    setState(() {
-      canSave = false;
-    });
   }
 
   void loadTimer() {
     if (timer == null)
       timer = Timer.periodic(Duration(seconds: 1), (timer) {
-        if (round < Constants.BuildPredictionSinglePlayerRoundCount) {
+        if (freeze) {
+          if (freezeCounter == 0) {
+            freezeCounter = 4;
+          }
+
+          freezeCounter--;
+
+          if (freezeCounter == 0) {
+            freeze = false;
+            nextRound(isTrue: indexOfSelected == trueAnswerIndex);
+          }
+
+          return;
+        }
+
+        if (!isEnded()) {
           setState(() {
             time++;
           });
@@ -601,6 +593,8 @@ class _SinglePlayerBuildPredictionState
           if (roundTimer - time <= 0) {
             nextRound();
           }
+        } else {
+          timer.cancel();
         }
       });
 
@@ -615,6 +609,11 @@ class _SinglePlayerBuildPredictionState
       Fluttertoast.showToast(msg: Language.exitTwoTap);
       return Future.value(false);
     }
+    returnMainPage();
+    return Future.value(false);
+  }
+
+  void returnMainPage() {
     Navigator.pushAndRemoveUntil(
       context,
       CupertinoPageRoute(
@@ -622,6 +621,5 @@ class _SinglePlayerBuildPredictionState
       ),
       (Route<dynamic> route) => false,
     );
-    return Future.value(false);
   }
 }

@@ -14,7 +14,6 @@ dependencies:
   http: ^0.13.3
   connectivity: ^3.0.2
   fluttertoast: ^7.1.8
-  google_maps_flutter: ^2.0.6
   material_design_icons_flutter: ^4.0.5855
   rflutter_alert: ^2.0.2
   url_launcher: ^6.0.3
@@ -34,7 +33,15 @@ dependencies:
   introduction_screen: ^2.1.0
   splashscreen: ^1.3.5
   devicelocale: ^0.4.1
-  #in_app_purchase: ^1.0.6
+  in_app_purchase: ^1.0.6
+  auto_size_text: ^2.1.0
+  firebase_core: ^1.3.0
+  firebase_auth: ^2.0.0
+  firebase_analytics: ^8.1.2
+  avatar_glow: ^2.0.1
+  email_validator: ^2.0.1
+  firebase_storage: ^9.0.0
+  cloud_firestore: ^2.3.0
 
 dev_dependencies:
   flutter_launcher_icons:
@@ -76,6 +83,8 @@ flutter:
     - assets/images/market/
     - assets/images/mode/
     - assets/images/intro/
+    - assets/images/profile/
+    - assets/images/game/
 
   fonts:
     - family: GrenzeGotisch

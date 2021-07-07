@@ -5,8 +5,13 @@ import 'package:traveler/audio/audio_controller.dart';
 import 'package:traveler/data/images.dart';
 import 'package:traveler/language/language.dart';
 import 'package:traveler/language/language_enum.dart';
+import 'package:traveler/pages/main_page.dart';
 
 class SettingsPage extends StatefulWidget {
+  final ParentMainPageState mainPage;
+
+  SettingsPage(this.mainPage);
+
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
@@ -32,7 +37,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SafeArea(
       child: getBody(),
     );
   }
@@ -41,155 +46,178 @@ class _SettingsPageState extends State<SettingsPage> {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
-    return Center(
-      child: Container(
-        padding: EdgeInsets.all(
-          10,
-        ),
-        height: height / 1.5,
-        width: width / 1.25,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(
-            .85,
-          ),
-          borderRadius: BorderRadius.circular(
-            10,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    Language.musicSound,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 19,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 7.5,
-                  ),
-                  Expanded(
-                    child: SleekCircularSlider(
-                      initialValue: _valueMusic,
-                      appearance: CircularSliderAppearance(
-                        customColors: CustomSliderColors(
-                          shadowColor: Colors.blue,
-                          progressBarColors: [
-                            Colors.red,
-                            Colors.orange,
-                            Colors.green,
-                            Colors.green
-                          ],
-                          dotColor: Colors.white,
-                          trackColor: Colors.grey,
-                        ),
-                      ),
-                      max: 100,
-                      onChangeEnd: (double value) {
-                        AudioController.setMusicVolume(value / 100);
-                      },
-                    ),
-                  ),
-                ],
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Center(
+          child: Container(
+            padding: EdgeInsets.all(
+              10,
+            ),
+            height: height / 1.5,
+            width: width / 1.25,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(
+                .75,
+              ),
+              borderRadius: BorderRadius.circular(
+                10,
               ),
             ),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    Language.sfxSound,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 19,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 7.5,
-                  ),
-                  Expanded(
-                    child: SleekCircularSlider(
-                      initialValue: _valueSound,
-                      appearance: CircularSliderAppearance(
-                        customColors: CustomSliderColors(
-                          shadowColor: Colors.blue,
-                          progressBarColors: [
-                            Colors.red,
-                            Colors.orange,
-                            Colors.green,
-                            Colors.green
-                          ],
-                          dotColor: Colors.white,
-                          trackColor: Colors.grey,
-                        ),
-                      ),
-                      max: 100,
-                      onChangeEnd: (double value) {
-                        AudioController.setSoundVolume(value / 100);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
                   child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            Language.changeLanguage(LanguageEnum.tr_TR);
-                          });
-                        },
-                        child: Image(
-                          image: Images.trTR,
-                          height: 100,
+                      Text(
+                        Language.musicSound,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 19,
                         ),
                       ),
-                      if (LanguageEnum.tr_TR == Language.languageEnum)
-                        Icon(
-                          MdiIcons.checkBold,
-                          size: 30,
-                          color: Colors.green,
+                      SizedBox(
+                        height: 7.5,
+                      ),
+                      Expanded(
+                        child: SleekCircularSlider(
+                          initialValue: _valueMusic,
+                          appearance: CircularSliderAppearance(
+                            customColors: CustomSliderColors(
+                              shadowColor: Colors.blue,
+                              progressBarColors: [
+                                Color(0xff041323),
+                                Color(0xff164F8B),
+                                Color(0xff195FA9),
+                                Color(0xff1C88FF),
+                              ],
+                              dotColor: Colors.white,
+                              trackColor: Colors.grey,
+                            ),
+                          ),
+                          max: 100,
+                          onChangeEnd: (double value) {
+                            AudioController.setMusicVolume(value / 100);
+                          },
                         ),
+                      ),
                     ],
                   ),
                 ),
                 Expanded(
                   child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            Language.changeLanguage(LanguageEnum.en_US);
-                          });
-                        },
-                        child: Image(
-                          image: Images.enUS,
-                          height: 100,
+                      Text(
+                        Language.sfxSound,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 19,
                         ),
                       ),
-                      if (LanguageEnum.en_US == Language.languageEnum)
-                        Icon(
-                          MdiIcons.checkBold,
-                          size: 30,
-                          color: Colors.green,
+                      SizedBox(
+                        height: 7.5,
+                      ),
+                      Expanded(
+                        child: SleekCircularSlider(
+                          initialValue: _valueSound,
+                          appearance: CircularSliderAppearance(
+                            customColors: CustomSliderColors(
+                              shadowColor: Colors.blue,
+                              progressBarColors: [
+                                Color(0xff041323),
+                                Color(0xff164F8B),
+                                Color(0xff195FA9),
+                                Color(0xff1C88FF),
+                              ],
+                              dotColor: Colors.white,
+                              trackColor: Colors.grey,
+                            ),
+                          ),
+                          max: 100,
+                          onChangeEnd: (double value) {
+                            AudioController.setSoundVolume(value / 100);
+                          },
                         ),
+                      ),
                     ],
                   ),
                 ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                Language.changeLanguage(LanguageEnum.tr_TR);
+                              });
+                            },
+                            child: Image(
+                              image: Images.trTR,
+                              height: 100,
+                            ),
+                          ),
+                          if (LanguageEnum.tr_TR == Language.languageEnum)
+                            Icon(
+                              MdiIcons.checkBold,
+                              size: 30,
+                              color: Colors.green,
+                            ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                Language.changeLanguage(LanguageEnum.en_US);
+                              });
+                            },
+                            child: Image(
+                              image: Images.enUS,
+                              height: 100,
+                            ),
+                          ),
+                          if (LanguageEnum.en_US == Language.languageEnum)
+                            Icon(
+                              MdiIcons.checkBold,
+                              size: 30,
+                              color: Colors.green,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
-      ),
+        Positioned(
+          left: 10,
+          top: 10,
+          child: GestureDetector(
+            onTap: () {
+              this.widget.mainPage.changeBody(null);
+            },
+            child: CircleAvatar(
+              radius: 22,
+              child: Icon(
+                MdiIcons.arrowLeftBold,
+                color: Color(0xff1C88FF),
+                size: 30,
+              ),
+              backgroundColor: Colors.white,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:traveler/language/language.dart';
 
-class SaveScoreTextField extends StatefulWidget {
+class StandartTextField extends StatefulWidget {
   final TextEditingController editingController;
+  final String hintText;
+  final Color color;
+  final bool passwordText;
+  final bool border;
+  final Widget suffix;
+  final Widget prefix;
 
-  SaveScoreTextField({this.editingController});
+  StandartTextField({
+    this.editingController,
+    this.color,
+    this.hintText,
+    this.passwordText = false,
+    this.border = true,
+    this.prefix,
+    this.suffix,
+  });
 
   @override
-  _SaveScoreTextFieldState createState() => _SaveScoreTextFieldState();
+  _StandartTextFieldState createState() => _StandartTextFieldState();
 }
 
-class _SaveScoreTextFieldState extends State<SaveScoreTextField> {
+class _StandartTextFieldState extends State<StandartTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
@@ -23,6 +36,7 @@ class _SaveScoreTextFieldState extends State<SaveScoreTextField> {
           32,
         ),
       ],
+      obscureText: widget.passwordText,
       decoration: InputDecoration(
         border: border(),
         focusedErrorBorder: border(),
@@ -30,9 +44,11 @@ class _SaveScoreTextFieldState extends State<SaveScoreTextField> {
         errorBorder: border(),
         enabledBorder: border(),
         disabledBorder: border(),
-        hintText: Language.typeName,
+        hintText: this.widget.hintText,
         hintStyle: style(),
         labelStyle: style(),
+        suffixIcon: widget.suffix,
+        prefix: widget.prefix,
       ),
     );
   }
@@ -40,19 +56,21 @@ class _SaveScoreTextFieldState extends State<SaveScoreTextField> {
   border() {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(
-        10,
+        widget.border ? 10 : 0,
       ),
-      borderSide: BorderSide(
-        color: Colors.white,
-        width: 1.25,
-        style: BorderStyle.solid,
-      ),
+      borderSide: widget.border
+          ? BorderSide(
+              color: this.widget.color,
+              width: 1.25,
+              style: BorderStyle.solid,
+            )
+          : BorderSide.none,
     );
   }
 
   style() {
     return TextStyle(
-      color: Colors.white,
+      color: this.widget.color,
       fontSize: 20,
       fontWeight: FontWeight.w500,
     );

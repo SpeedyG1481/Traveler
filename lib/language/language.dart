@@ -61,12 +61,33 @@ class Language {
   static String mistakeCount;
   static String wonPoint;
   static String debugModeError;
+  static String canNotBuyOnThisPhone;
+  static String profile;
+  static String mail;
+  static String password;
+  static String login;
+  static String warning;
+  static String emailOrPasswordSyntaxError;
+  static String registerError;
+  static String loginError;
+  static String usernameMinLenghtError;
+  static String typeUsername;
+  static String usernameChangeSuccess;
+  static String pointBig;
+  static String pointAverage;
+  static String totalPoint;
+  static String maximumPoint;
+  static String gamesPlayed;
+  static String countOfTrues;
+  static String countOfFalses;
 
   static String warningSelectProvince;
   static String warningMaximumUploadSize;
   static String warningMultiplayerComingSoon;
   static String warningReadTermsOfUsage;
-  static String warningUploadPhotoMustPortrait;
+  static String warningUploadPhotoMustLandscape;
+
+
 
 
 
@@ -158,12 +179,31 @@ class Language {
     mistakeCount = map["MistakeCount"];
     wonPoint = map["WonPoint"];
     debugModeError = map["DebugModeError"];
+    canNotBuyOnThisPhone = map["CanNotBuyOnThisPhone"];
+    profile = map["Profile"];
+    mail = map["Mail"];
+    password = map["Password"];
+    login = map["Login"];
+    warning = map["Warning"];
+    emailOrPasswordSyntaxError = map["EmailOrPasswordSyntaxError"];
+    registerError = map["RegisterError"];
+    loginError = map["LoginError"];
+    usernameMinLenghtError = map["UsernameMinLenghtError"];
+    typeUsername = map["TypeUsername"];
+    usernameChangeSuccess = map["UsernameChangeSuccess"];
+    pointBig = map["PointBig"];
+    pointAverage = map["PointAverage"];
+    totalPoint = map["TotalPoint"];
+    maximumPoint = map["MaximumPoint"];
+    gamesPlayed = map["GamesPlayed"];
+    countOfTrues = map["CountOfTrues"];
+    countOfFalses = map["CountOfFalses"];
 
     warningSelectProvince = map["WarningSelectProvince"];
     warningMaximumUploadSize = map["WarningMaximumUploadSize"];
     warningReadTermsOfUsage = map["WarningReadTermsOfUsage"];
     warningMultiplayerComingSoon = map["WarningMultiplayerComingSoon"];
-    warningUploadPhotoMustPortrait = map["WarningUploadPhotoMustPortrait"];
+    warningUploadPhotoMustLandscape = map["WarningUploadPhotoMustLandscape"];
   }
 
   static void checkNull() {

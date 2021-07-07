@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -35,6 +36,7 @@ class UploadPage extends StatefulWidget {
 
 class _UploadPageState extends State<UploadPage> {
   PickedFile uploadimage;
+  Future<Uint8List> image;
 
   TextEditingController cityNameController = TextEditingController();
   TextEditingController photoUploaderNameController = TextEditingController();
@@ -53,8 +55,31 @@ class _UploadPageState extends State<UploadPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: getBody(),
+    return SafeArea(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          getBody(),
+          Positioned(
+            left: 10,
+            top: 10,
+            child: GestureDetector(
+              onTap: () {
+                this.widget.mainPage.changeBody(null);
+              },
+              child: CircleAvatar(
+                radius: 22,
+                child: Icon(
+                  MdiIcons.arrowLeftBold,
+                  color: Color(0xff1C88FF),
+                  size: 30,
+                ),
+                backgroundColor: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -98,9 +123,10 @@ class _UploadPageState extends State<UploadPage> {
     }
 
     List<int> imageBytes = await uploadimage.readAsBytes();
+
     var image = await decodeImageFromList(imageBytes);
-    if (image.width > image.height) {
-      Fluttertoast.showToast(msg: Language.warningUploadPhotoMustPortrait);
+    if (image.width < image.height) {
+      Fluttertoast.showToast(msg: Language.warningUploadPhotoMustLandscape);
       setState(() {
         isUploading = false;
       });
@@ -156,46 +182,49 @@ class _UploadPageState extends State<UploadPage> {
   showImage() {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    return Stack(
+    return Column(
       children: [
-        FutureBuilder(
-          future: this.uploadimage.readAsBytes(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return SpinKitCubeGrid(
-                color: Colors.white,
-              );
-            }
-
-            return Image.memory(
-              snapshot.data,
-              height: height,
-              width: width,
-              fit: BoxFit.fill,
-            );
-          },
+        SizedBox(
+          height: 50,
         ),
-        Positioned(
-          left: 5,
-          top: 5,
-          child: GestureDetector(
-            onTap: () {
-              this.widget.mainPage.changeBody(null);
-            },
-            child: CircleAvatar(
-              radius: 22,
-              child: Icon(
-                MdiIcons.close,
-                color: Colors.white,
-                size: 30,
-              ),
-              backgroundColor: Color(0xff1C88FF),
+        Expanded(
+          flex: 4,
+          child: Container(
+            padding: EdgeInsets.all(
+              15,
+            ),
+            width: width / 1.05,
+            child: FutureBuilder(
+              future: image,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return SpinKitCubeGrid(
+                    color: Colors.white,
+                  );
+                }
+
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(
+                      15,
+                    ),
+                    image: DecorationImage(
+                      image: Image.memory(
+                        snapshot.data,
+                        height: height,
+                        width: width,
+                        fit: BoxFit.fill,
+                      ).image,
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),
-        Positioned(
-          bottom: 0,
-          left: width / 4,
+        Expanded(
+          flex: 6,
           child: Container(
             padding: EdgeInsets.symmetric(
               horizontal: 10,
@@ -204,7 +233,7 @@ class _UploadPageState extends State<UploadPage> {
             width: width / 2,
             child: getCities(),
           ),
-        )
+        ),
       ],
     );
   }
@@ -272,33 +301,6 @@ class _UploadPageState extends State<UploadPage> {
                 ),
               ),
             ),
-            // SizedBox(
-            //   height: 25,
-            // ),
-            // GestureDetector(
-            //   onTap: () {
-            //     chooseImageCamera();
-            //   },
-            //   child: Container(
-            //     width: width / 2,
-            //     height: 50,
-            //     child: Center(
-            //       child: Text(
-            //         Language.takePhoto,
-            //         style: TextStyle(
-            //           color: Colors.white,
-            //           fontWeight: FontWeight.w600,
-            //           fontSize: 19,
-            //         ),
-            //       ),
-            //     ),
-            //     decoration: BoxDecoration(
-            //       image: DecorationImage(
-            //         image: Images.bigButton,
-            //       ),
-            //     ),
-            //   ),
-            // ),
             SizedBox(
               height: 15,
             ),
@@ -339,6 +341,7 @@ class _UploadPageState extends State<UploadPage> {
         await picker.getImage(source: ImageSource.gallery);
     setState(() {
       uploadimage = choosedimage;
+      this.image = uploadimage.readAsBytes();
     });
   }
 
@@ -348,35 +351,44 @@ class _UploadPageState extends State<UploadPage> {
     PickedFile choosedimage = await picker.getImage(source: ImageSource.camera);
     setState(() {
       uploadimage = choosedimage;
+      this.image = uploadimage.readAsBytes();
     });
   }
 
   getCities() {
     if (uploadStatus) {
-      return Container(
-        padding: EdgeInsets.all(
-          10,
-        ),
-        decoration: BoxDecoration(
-          color: this.lastUploadStatus
-              ? Color(
-                  0xff1C88FF,
-                )
-              : Colors.red,
-        ),
-        child: Center(
-          child: Text(
-            this.lastUploadStatus
-                ? Language.uploadPhotoSuccess
-                : Language.uploadPhotoUnsuccess,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(
+              10,
             ),
-            textAlign: TextAlign.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                10,
+              ),
+              color: this.lastUploadStatus
+                  ? Color(
+                      0xff1C88FF,
+                    )
+                  : Colors.red,
+            ),
+            child: Center(
+              child: Text(
+                this.lastUploadStatus
+                    ? Language.uploadPhotoSuccess
+                    : Language.uploadPhotoUnsuccess,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
-        ),
+        ],
       );
     }
     return Column(
@@ -443,7 +455,7 @@ class _UploadPageState extends State<UploadPage> {
                   ),
                   getTextField(
                     contentPadding: 5.5,
-                    maxLines: 2,
+                    maxLines: 1,
                     hint: Language.wantToShareName,
                     controller: photoUploaderNameController,
                   ),

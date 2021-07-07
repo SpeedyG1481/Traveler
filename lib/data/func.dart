@@ -3,18 +3,15 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:device_info/device_info.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:styled_text/styled_text.dart';
 import 'package:traveler/data/constants.dart';
-import 'package:traveler/language/language_enum.dart';
-import 'package:traveler/models/meter_types.dart';
 
 class Functions {
-
-
   static Future<DateTime> getGMT({Duration subtract, Duration add}) async {
     Response response = await get(
       Uri.parse(Constants.timeUrl),
@@ -25,29 +22,6 @@ class Functions {
     if (add != null) time = time.add(add);
 
     return time;
-  }
-
-  static MeterTypes distanceBetween(
-    double startLatitude,
-    double startLongitude,
-    double endLatitude,
-    double endLongitude,
-  ) {
-    var earthRadius = 6378137.0;
-    var dLat = _toRadians(endLatitude - startLatitude);
-    var dLon = _toRadians(endLongitude - startLongitude);
-
-    var a = pow(sin(dLat / 2), 2) +
-        pow(sin(dLon / 2), 2) *
-            cos(_toRadians(startLatitude)) *
-            cos(_toRadians(endLatitude));
-    var c = 2 * asin(sqrt(a));
-
-    return MeterTypes(earthRadius * c);
-  }
-
-  static _toRadians(double degree) {
-    return degree * pi / 180;
   }
 
   static Future<String> getDeviceDetails() async {
@@ -131,6 +105,7 @@ class Functions {
             ),
             child: StyledText(
               text: "<big>•</big> " + contentIn,
+              // ignore: deprecated_member_use
               styles: {
                 "big": TextStyle(
                   color: Colors.black,
@@ -151,4 +126,21 @@ class Functions {
 
     return list;
   }
+
+  static List shuffle(List items) {
+    var random = new Random();
+    for (var i = items.length - 1; i > 0; i--) {
+      var n = random.nextInt(i + 1);
+      var temp = items[i];
+      items[i] = items[n];
+      items[n] = temp;
+    }
+
+    return items;
+  }
+
+  static bool isValidMail(String mail){
+    return EmailValidator.validate(mail);
+  }
+
 }

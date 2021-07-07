@@ -38,11 +38,13 @@ class ParentMainPageState extends State<ParentMainPage> {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
     return WillPopScope(
       onWillPop: onWillPop,
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: SafeArea(
+        resizeToAvoidBottomInset: true,
+        body: SingleChildScrollView(
           child: Container(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,

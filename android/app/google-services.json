@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "986412607602",
+    "project_id": "traveler-fe96a",
+    "storage_bucket": "traveler-fe96a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:986412607602:android:f0b16946921e40599d3aeb",
+        "android_client_info": {
+          "package_name": "com.mgs.traveler"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "986412607602-ufvtsvfu3f99g69mgnfv0erg5udlh5ul.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtZN3LE-vIHUMMZ6DX-6ayfUfFj-0vBKw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "986412607602-ufvtsvfu3f99g69mgnfv0erg5udlh5ul.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

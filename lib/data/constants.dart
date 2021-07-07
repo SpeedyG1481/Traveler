@@ -4,7 +4,7 @@ class Constants {
   static const bool debugMode = true;
 
   static const int BuildPredictionSinglePlayerRoundCount = 5;
-  static const int BuildPredictionSinglePlayerQuestionTimer = 90;
+  static const int BuildPredictionSinglePlayerQuestionTimer = 45;
   static const int HealthPerMinute = 12;
 
   static const List<int> BuildPredictionSuccessLevels = [10, 100, 1000];
@@ -22,9 +22,6 @@ class Constants {
   static const String apiURL =
       siteUrl + "/api/games/traveler/fetch_data_from_mobile.php";
 
-  static const String newScoreUrl =
-      siteUrl + "/api/games/traveler/new_score.php";
-
   //LANG ADD
   static String userContractUrl = siteUrl +
       "/api/games/traveler/privacy/?lang=" +
@@ -32,7 +29,7 @@ class Constants {
 
   static String timeUrl = siteUrl + "/api/games/traveler/time.php";
 
-  static const String rankingSiteUrl = siteUrl + "/api/games/traveler/rankings";
+  static const String rankingSiteUrl = siteUrl + "/rankings/index.php?game=traveler";
 
   static String userImageUploadURL =
       siteUrl + "/api/games/traveler/upload_new_image.php";
