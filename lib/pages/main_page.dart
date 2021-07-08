@@ -22,7 +22,6 @@ class ParentMainPageState extends State<ParentMainPage> {
   double offset = -1000;
 
   changeBody(Widget body) {
-    print(body.toString());
     Functions.logAnalytics(body);
 
     setState(() {

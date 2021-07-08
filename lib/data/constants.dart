@@ -1,9 +1,9 @@
 import 'package:traveler/language/language.dart';
 
 class Constants {
-  static const bool debugMode = true;
+  static const bool debugMode = false;
 
-  static const int BuildPredictionSinglePlayerRoundCount = 5;
+  static const int BuildPredictionSinglePlayerRoundCount = 10;
   static const int BuildPredictionSinglePlayerQuestionTimer = 45;
   static const int HealthPerMinute = 12;
 

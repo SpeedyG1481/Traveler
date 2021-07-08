@@ -334,10 +334,13 @@ class _SinglePlayerBuildPredictionState
           ),
           if (playGameBannerAd != null)
             Container(
-                color: Colors.white,
-                width: playGameBannerAd.size.width.toDouble(),
-                height: playGameBannerAd.size.height.toDouble(),
-                child: AdWidget(ad: playGameBannerAd)),
+              color: Colors.white,
+              width: playGameBannerAd.size.width.toDouble(),
+              height: playGameBannerAd.size.height.toDouble(),
+              child: AdWidget(
+                ad: playGameBannerAd,
+              ),
+            ),
           SizedBox(
             height: playGameBannerAd != null ? 3.75 : 75,
           ),
