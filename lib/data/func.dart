@@ -10,6 +10,7 @@ import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:styled_text/styled_text.dart';
 import 'package:traveler/data/constants.dart';
+import 'package:traveler/main.dart';
 
 class Functions {
   static Future<DateTime> getGMT({Duration subtract, Duration add}) async {
@@ -139,8 +140,21 @@ class Functions {
     return items;
   }
 
-  static bool isValidMail(String mail){
+  static bool isValidMail(String mail) {
     return EmailValidator.validate(mail);
   }
 
+  static void logAnalytics(Widget body) async {
+    if (analytics == null) return;
+    DateTime dateTime = (await getGMT());
+    String time = dateTime.toIso8601String();
+    analytics.logEvent(
+      name: 'change_page',
+      parameters: <String, dynamic>{
+        'page_name': body == null ? "Main Page" : body.toString(),
+        'time': time,
+        'epoch': dateTime.millisecondsSinceEpoch
+      },
+    );
+  }
 }

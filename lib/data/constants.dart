@@ -7,6 +7,8 @@ class Constants {
   static const int BuildPredictionSinglePlayerQuestionTimer = 45;
   static const int HealthPerMinute = 12;
 
+  static bool canRemoveAds = false;
+
   static const List<int> BuildPredictionSuccessLevels = [10, 100, 1000];
 
   static const int MaximumUploadSizeBytes = MaximumUploadSizeKiloBytes * 1024;
@@ -29,7 +31,8 @@ class Constants {
 
   static String timeUrl = siteUrl + "/api/games/traveler/time.php";
 
-  static const String rankingSiteUrl = siteUrl + "/rankings/index.php?game=traveler";
+  static const String rankingSiteUrl =
+      siteUrl + "/rankings/index.php?game=traveler";
 
   static String userImageUploadURL =
       siteUrl + "/api/games/traveler/upload_new_image.php";

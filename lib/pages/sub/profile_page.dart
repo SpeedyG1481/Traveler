@@ -14,7 +14,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:traveler/components/standart_text_field.dart';
 import 'package:traveler/data/ads.dart';
+import 'package:traveler/data/constants.dart';
 import 'package:traveler/data/func.dart';
+import 'package:traveler/data/iap.dart';
 import 'package:traveler/data/images.dart';
 import 'package:traveler/language/language.dart';
 import 'package:traveler/models/other/progress_dialog.dart';
@@ -37,6 +39,10 @@ class _ProfilePageState extends State<ProfilePage> {
   TextEditingController usernameController = TextEditingController();
 
   Future loadAd() async {
+    if (Constants.canRemoveAds) {
+      return;
+    }
+
     InterstitialAd.load(
       adUnitId: Ads.getProfileInterstitialId(),
       request: AdRequest(),

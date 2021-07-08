@@ -6,7 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:traveler/data/constants.dart';
+import 'package:traveler/data/iap.dart';
 import 'package:traveler/pages/intro/splash_screen.dart';
+
+FirebaseAnalytics analytics;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,8 +25,9 @@ void main() async {
     InAppPurchaseAndroidPlatformAddition.enablePendingPurchases();
   }
 
-  FirebaseAnalytics analytics = FirebaseAnalytics();
+  analytics = FirebaseAnalytics();
   await Firebase.initializeApp();
+  Constants.canRemoveAds = await IAP.canRemoveAds();
 
   runApp(
     MaterialApp(

@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:traveler/data/constants.dart';
 import 'package:traveler/data/func.dart';
+import 'package:traveler/data/iap.dart';
 import 'package:traveler/language/language.dart';
 
 class HealthSystem {
@@ -35,7 +36,13 @@ class HealthSystem {
     int currentSavedTime = preferences.getInt("FillTime");
     if (currentSavedTime == null) {
       int time = (await Functions.getGMT()).millisecondsSinceEpoch;
-      time += (Constants.HealthPerMinute * 60 * 1000 * maxHealth);
+
+      int multiplier = Constants.HealthPerMinute;
+      if (await IAP.canReloadQuickness()) {
+        multiplier ~/= 2;
+      }
+
+      time += (multiplier * 60 * 1000 * maxHealth);
       await preferences.setInt("FillTime", time);
     }
   }

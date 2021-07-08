@@ -31,6 +31,7 @@ class SinglePlayerBuildPrediction extends StatefulWidget {
 class _SinglePlayerBuildPredictionState
     extends State<SinglePlayerBuildPrediction> {
   InterstitialAd playGameInterstitial;
+  BannerAd playGameBannerAd;
 
   DateTime currentBackPressTime;
 
@@ -50,10 +51,16 @@ class _SinglePlayerBuildPredictionState
 
   bool freeze = false;
 
+  bool onlyOne = true;
+
   int trueCount = 0;
   int falseCount = 0;
 
   Future loadAd() async {
+    if (Constants.canRemoveAds) {
+      return;
+    }
+
     InterstitialAd.load(
       adUnitId: Ads.getPlayGameInterstitialId(),
       request: AdRequest(),
@@ -69,6 +76,30 @@ class _SinglePlayerBuildPredictionState
     );
   }
 
+  Future<void> loadBannerAd() async {
+    int height = 60;
+    int width = MediaQuery.of(context).size.width.truncate();
+    final BannerAd banner = BannerAd(
+      size: AdSize(height: height, width: width),
+      request: AdRequest(),
+      adUnitId: Ads.getInGameBannerId(),
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          setState(() {
+            playGameBannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          ad.dispose();
+        },
+        // onAdOpened: (Ad ad) => print('$BannerAd onAdOpened.'),
+        // onAdClosed: (Ad ad) => print('$BannerAd onAdClosed.'),
+      ),
+    );
+    onlyOne = false;
+    return banner.load();
+  }
+
   Future showAd() async {
     if (this.playGameInterstitial != null) {
       await this.playGameInterstitial.show();
@@ -77,6 +108,7 @@ class _SinglePlayerBuildPredictionState
 
   @override
   void dispose() {
+    if (playGameBannerAd != null) playGameBannerAd.dispose();
     if (playGameInterstitial != null) playGameInterstitial.dispose();
     if (timer != null) timer.cancel();
     timer = null;
@@ -97,6 +129,7 @@ class _SinglePlayerBuildPredictionState
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    if (onlyOne && !Constants.canRemoveAds) loadBannerAd();
 
     return WillPopScope(
       onWillPop: onWillPop,
@@ -297,7 +330,16 @@ class _SinglePlayerBuildPredictionState
       return Column(
         children: [
           SizedBox(
-            height: 20,
+            height: playGameBannerAd != null ? 3.75 : 0,
+          ),
+          if (playGameBannerAd != null)
+            Container(
+                color: Colors.white,
+                width: playGameBannerAd.size.width.toDouble(),
+                height: playGameBannerAd.size.height.toDouble(),
+                child: AdWidget(ad: playGameBannerAd)),
+          SizedBox(
+            height: playGameBannerAd != null ? 3.75 : 75,
           ),
           Expanded(
             flex: 5,
@@ -528,9 +570,10 @@ class _SinglePlayerBuildPredictionState
     }
 
     loadTimer();
-    setState(() {
-      this.isLoading = false;
-    });
+    if (mounted)
+      setState(() {
+        this.isLoading = false;
+      });
   }
 
   void nextRound({bool isTrue}) {

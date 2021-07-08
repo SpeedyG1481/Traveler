@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:traveler/audio/audio_controller.dart';
 import 'package:traveler/data/audio_files.dart';
+import 'package:traveler/data/func.dart';
 import 'package:traveler/data/images.dart';
 import 'package:traveler/language/language.dart';
 import 'package:traveler/pages/sub/first_main_page.dart';
@@ -21,6 +22,9 @@ class ParentMainPageState extends State<ParentMainPage> {
   double offset = -1000;
 
   changeBody(Widget body) {
+    print(body.toString());
+    Functions.logAnalytics(body);
+
     setState(() {
       this.body = body;
       if (body is ParentMainPageState)
@@ -38,8 +42,6 @@ class ParentMainPageState extends State<ParentMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
     return WillPopScope(
       onWillPop: onWillPop,
       child: Scaffold(

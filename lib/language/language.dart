@@ -83,6 +83,15 @@ class Language {
   static String noHealthTitle;
   static String doYouWantToWatchAd;
   static String watch;
+  static String iapAlreadyPurchased;
+  static String restoreButtonTooltip;
+  static String purchased;
+  static String removeAdsLine1;
+  static String removeAdsLine2;
+  static String reloadQuicknessLine1;
+  static String reloadQuicknessLine2;
+  static String reloadQuicknessTooltip;
+  static String removeAdsTooltip;
 
   static String warningSelectProvince;
   static String warningMaximumUploadSize;
@@ -204,6 +213,15 @@ class Language {
     noHealthTitle = map["NoHealthTitle"];
     doYouWantToWatchAd = map["DoYouWantToWatchAd"];
     watch = map["Watch"];
+    iapAlreadyPurchased = map["IapAlreadyPurchased"];
+    restoreButtonTooltip = map["RestoreButtonTooltip"];
+    purchased = map["Purchased"];
+    removeAdsLine1 = map["RemoveAdsLine1"];
+    removeAdsLine2 = map["RemoveAdsLine2"];
+    reloadQuicknessLine1 = map["ReloadQuicknessLine1"];
+    reloadQuicknessLine2 = map["ReloadQuicknessLine2"];
+    reloadQuicknessTooltip = map["ReloadQuicknessTooltip"];
+    removeAdsTooltip = map["RemoveAdsTooltip"];
 
     warningSelectProvince = map["WarningSelectProvince"];
     warningMaximumUploadSize = map["WarningMaximumUploadSize"];

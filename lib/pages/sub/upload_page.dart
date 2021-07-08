@@ -52,6 +52,10 @@ class _UploadPageState extends State<UploadPage> {
   bool lastUploadStatus = false;
 
   Future loadAd() async {
+    if (Constants.canRemoveAds) {
+      return;
+    }
+
     InterstitialAd.load(
       adUnitId: Ads.getPromoteCityInterstitialId(),
       request: AdRequest(),
@@ -440,8 +444,8 @@ class _UploadPageState extends State<UploadPage> {
           height: 15,
         ),
         if (loading)
-          SpinKitChasingDots(
-            color: Color(0xff1C88FF),
+          SpinKitDualRing(
+            color: Colors.white,
             size: 30,
           )
         else
@@ -497,7 +501,7 @@ class _UploadPageState extends State<UploadPage> {
                   ),
                   if (isUploading)
                     SpinKitDualRing(
-                      color: Color(0xff1C88FF),
+                      color: Colors.white,
                     )
                   else
                     CircleAvatar(
