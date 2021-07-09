@@ -2,14 +2,13 @@ import 'package:traveler/language/language.dart';
 
 class Constants {
   static const bool debugMode = false;
-
   static const int BuildPredictionSinglePlayerRoundCount = 10;
+
   static const int BuildPredictionSinglePlayerQuestionTimer = 45;
   static const int HealthPerMinute = 12;
+  static const int TotalWrongAnswerCount = 4;
 
   static bool canRemoveAds = false;
-
-  static const List<int> BuildPredictionSuccessLevels = [10, 100, 1000];
 
   static const int MaximumUploadSizeBytes = MaximumUploadSizeKiloBytes * 1024;
   static const int MaximumUploadSizeKiloBytes =
@@ -17,7 +16,7 @@ class Constants {
   static const int MaximumUploadSizeMegaBytes = 10;
 
   static const String securityToken =
-      "d2c7f149e689cb9b436871de001d66feae1d8b7798b8605765a3db52cbf728b3";
+      "009b40a9f620361b7348824601d85fa8ae62fc9a6fd11dc1d02c2d589458526664fcac2c994c4a019bbfd28c6cfb671e3a7e8f783b7a50a1982360eacbbbe7c8";
 
   static const String siteUrl = "https://studio.megalowofficial.com";
 

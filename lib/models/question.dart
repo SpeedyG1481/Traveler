@@ -22,12 +22,7 @@ class Question {
     @required this.city,
     @required this.otherAnswers,
     this.uploaderName,
-  }) {
-    allAnswers = [];
-    allAnswers.addAll(otherAnswers);
-    allAnswers.add(city);
-    allAnswers = Functions.shuffle(allAnswers);
-  }
+  });
 
   Question.fromMap(Map map, {City city, List<City> otherAnswers})
       : this(
@@ -39,4 +34,11 @@ class Question {
           otherAnswers: otherAnswers,
           questionId: int.parse(map["questionId"]),
         );
+
+  void addOtherAnswers(List<City> others) {
+    allAnswers = [];
+    allAnswers.addAll(others);
+    allAnswers.add(city);
+    allAnswers = Functions.shuffle(allAnswers);
+  }
 }

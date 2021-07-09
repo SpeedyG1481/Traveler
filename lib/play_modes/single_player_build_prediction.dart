@@ -342,7 +342,7 @@ class _SinglePlayerBuildPredictionState
               ),
             ),
           SizedBox(
-            height: playGameBannerAd != null ? 3.75 : 75,
+            height: playGameBannerAd != null ? 3.75 : 35,
           ),
           Expanded(
             flex: 5,
@@ -494,10 +494,11 @@ class _SinglePlayerBuildPredictionState
                       )
                     : null
                 : null,
-            image: DecorationImage(
-              image: Images.answerBackground,
-              fit: BoxFit.fill,
-            ),
+            // image: DecorationImage(
+            //   image: Images.answerBackground,
+            //   fit: BoxFit.fill,
+            // ),
+            color: Color(0xff00EAD3),
             borderRadius: BorderRadius.circular(
               21,
             ),
@@ -526,39 +527,35 @@ class _SinglePlayerBuildPredictionState
   }
 
   Future loadQuestions() async {
-    DataModel dataModel = await DatabaseController.query(
+    String firstQuery =
         "SELECT questions.*, cities.*, states.name as stateName, countries.name as countryName FROM "
-                "questions, cities, states, countries WHERE cities.state_id = states.id AND countries.id = cities.country_id AND "
-                "cities.id = questions.cityId AND status = true ORDER BY RAND() LIMIT " +
-            Constants.BuildPredictionSinglePlayerRoundCount.toString());
+                "questions, states, countries, cities, (SELECT questionId AS qid FROM questions ORDER BY RAND() LIMIT " +
+            Constants.BuildPredictionSinglePlayerRoundCount.toString() +
+            ") as random WHERE "
+                "questions.cityId = cities.id AND questions.questionId = random.qid AND cities.state_id = states.id AND cities.country_id = countries.id AND questions.status = true";
+
+    DataModel dataModel = await DatabaseController.query(firstQuery);
     this.questions = [];
-    for (Map m in dataModel.data) {
-      DataModel dataModel = await DatabaseController.query(
-          "SELECT cities.*, states.name as stateName, countries.name as countryName FROM "
-                  "cities, states, countries WHERE "
-                  "cities.state_id = states.id AND "
-                  "countries.id = cities.country_id AND "
-                  "cities.id != " +
-              m["id"] +
-              " ORDER BY RAND() LIMIT 4");
-      List<City> cities = [];
-      for (Map map in dataModel.data) {
-        cities.add(
-          City.fromMap(
-            map,
-            country: Country(
-              name: map["countryName"],
-            ),
-            state: Province(
-              name: map["stateName"],
-            ),
-          ),
-        );
-      }
+
+    String query =
+        "SELECT cities.*, states.name as stateName, countries.name as countryName FROM "
+                "states, countries, cities, (SELECT id AS cid FROM cities ORDER BY RAND() LIMIT " +
+            (Constants.TotalWrongAnswerCount *
+                    Constants.BuildPredictionSinglePlayerRoundCount)
+                .toString() +
+            ") as random WHERE "
+                "cities.id = random.cid AND cities.state_id = states.id AND cities.country_id = countries.id";
+
+    int j = 0;
+    List list = dataModel.data;
+    for (Map m in list) {
+      if (j == 0) query += " AND ";
+      query += ("cities.id != " + m["id"]);
+      if (j != list.length - 1) query += " AND ";
+
       this.questions.add(
             Question.fromMap(
               m,
-              otherAnswers: cities,
               city: City.fromMap(
                 m,
                 state: Province(
@@ -570,6 +567,36 @@ class _SinglePlayerBuildPredictionState
               ),
             ),
           );
+
+      j++;
+    }
+
+    DataModel subDataModel = await DatabaseController.query(query);
+    List<City> cities = [];
+    int i = 0;
+    for (Map map in subDataModel.data) {
+      cities.add(
+        City.fromMap(
+          map,
+          country: Country(
+            name: map["countryName"],
+          ),
+          state: Province(
+            name: map["stateName"],
+          ),
+        ),
+      );
+
+      if (cities.length == Constants.TotalWrongAnswerCount) {
+        if (i >= questions.length) {
+          continue;
+        }
+        List<City> cityList = [];
+        cityList.addAll(cities);
+        questions[i].addOtherAnswers(cityList);
+        cities.clear();
+        i++;
+      }
     }
 
     loadTimer();

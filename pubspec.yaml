@@ -17,7 +17,7 @@ dependencies:
   material_design_icons_flutter: ^4.0.5855
   rflutter_alert: ^2.0.2
   url_launcher: ^6.0.3
-  audioplayers: ^0.19.0
+  audioplayers: ^0.19.1
   cupertino_icons: ^1.0.2
   shared_preferences: ^2.0.6
   flutter_spinkit: ^5.0.0

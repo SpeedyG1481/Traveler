@@ -1,6 +1,5 @@
 import UIKit
 import Flutter
-import GoogleMaps
 import Firebase
 import GoogleMobileAds
 
@@ -10,7 +9,6 @@ import GoogleMobileAds
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    GMSServices.provideAPIKey("AIzaSyBGu10TRG_e6OZQ4zBg4Im4zRj2pd3a8J0")
     GeneratedPluginRegistrant.register(with: self)
     GADMobileAds.sharedInstance().start(completionHandler: nil)
     FirebaseApp.configure()

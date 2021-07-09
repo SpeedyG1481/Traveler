@@ -7,21 +7,25 @@ class AudioController {
   );
   static AudioCache musicAudioCache = AudioCache(
     fixedPlayer: musicAudioPlayer,
+    respectSilence: true,
   );
 
   static AudioPlayer soundAudioPlayer = AudioPlayer(
     playerId: "megalow_game_studio_traveler_sound_audio_player",
+    mode: PlayerMode.LOW_LATENCY,
   );
   static AudioCache soundAudioCache = AudioCache(
     fixedPlayer: soundAudioPlayer,
+    respectSilence: true,
   );
 
   static void playSoundEffect(String source) async {
     if (soundAudioCache.fixedPlayer.state == PlayerState.PLAYING) {
       await soundAudioCache.fixedPlayer.stop();
     }
-    soundAudioPlayer.setVolume(await getSoundVolume());
-    soundAudioCache.play(source, volume: await getSoundVolume());
+    await soundAudioPlayer.setVolume(await getSoundVolume());
+    await soundAudioCache.play(source, volume: await getSoundVolume());
+    await soundAudioPlayer.setVolume(await getSoundVolume());
   }
 
   static void stopBackgroundMusic() async {
@@ -35,8 +39,9 @@ class AudioController {
       await musicAudioCache.fixedPlayer.stop();
     }
 
-    musicAudioPlayer.setVolume(await getMusicVolume());
+    await musicAudioPlayer.setVolume(await getMusicVolume());
     await musicAudioCache.loop(source);
+    await musicAudioPlayer.setVolume(await getMusicVolume());
   }
 
   static Future<double> getSoundVolume() async {

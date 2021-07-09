@@ -28,20 +28,29 @@ class ModeSelectionPage extends StatefulWidget {
   }
 }
 
-class _ModeSelectionPageState extends State<ModeSelectionPage> {
+class _ModeSelectionPageState extends State<ModeSelectionPage>
+    with SingleTickerProviderStateMixin {
   Timer timer;
   RewardedAd rewardedAd;
+  AnimationController rotationController;
 
   @override
   void dispose() {
     if (rewardedAd != null) rewardedAd.dispose();
     if (timer != null) timer.cancel();
+    if (rotationController != null) rotationController.dispose();
     timer = null;
     super.dispose();
   }
 
   @override
   void initState() {
+    rotationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    rotationController.forward(from: 0.0);
+    rotationController.repeat(period: Duration(seconds: 2));
     loadTimer();
     super.initState();
   }
@@ -176,8 +185,12 @@ class _ModeSelectionPageState extends State<ModeSelectionPage> {
                       onTap: () {
                         market();
                       },
-                      child: Image(
-                        image: Images.market,
+                      child: RotationTransition(
+                        turns: Tween(begin: 0.0, end: 1.0)
+                            .animate(rotationController),
+                        child: Image(
+                          image: Images.market,
+                        ),
                       ),
                     ),
                   ),

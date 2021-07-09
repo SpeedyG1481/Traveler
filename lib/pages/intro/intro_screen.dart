@@ -27,7 +27,7 @@ class _IntroScreenState extends State<IntroScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.black,
-            fontSize: 22.5,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -41,7 +41,7 @@ class _IntroScreenState extends State<IntroScreen> {
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: 15,
                 ),
               ),
             ),
@@ -68,7 +68,7 @@ class _IntroScreenState extends State<IntroScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.black,
-            fontSize: 22.5,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -82,7 +82,7 @@ class _IntroScreenState extends State<IntroScreen> {
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: 15,
                 ),
               ),
             ),
@@ -109,7 +109,7 @@ class _IntroScreenState extends State<IntroScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.black,
-            fontSize: 22.5,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -123,7 +123,7 @@ class _IntroScreenState extends State<IntroScreen> {
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: 15,
                 ),
               ),
             ),

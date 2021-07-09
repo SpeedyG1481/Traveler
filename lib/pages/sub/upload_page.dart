@@ -376,9 +376,10 @@ class _UploadPageState extends State<UploadPage> {
 
     PickedFile choosedimage =
         await picker.getImage(source: ImageSource.gallery);
+
     setState(() {
       uploadimage = choosedimage;
-      this.image = uploadimage.readAsBytes();
+      if (uploadimage != null) this.image = uploadimage.readAsBytes();
     });
   }
 
