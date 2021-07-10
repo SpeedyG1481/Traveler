@@ -92,6 +92,10 @@ class Language {
   static String reloadQuicknessLine2;
   static String reloadQuicknessTooltip;
   static String removeAdsTooltip;
+  static String reportTypeLowResolution;
+  static String reportTypeWrongData;
+  static String reportTypeOther;
+  static String information;
 
   static String warningSelectProvince;
   static String warningMaximumUploadSize;
@@ -222,6 +226,10 @@ class Language {
     reloadQuicknessLine2 = map["ReloadQuicknessLine2"];
     reloadQuicknessTooltip = map["ReloadQuicknessTooltip"];
     removeAdsTooltip = map["RemoveAdsTooltip"];
+    reportTypeLowResolution = map["ReportTypeLowResolution"];
+    reportTypeWrongData = map["ReportTypeWrongData"];
+    reportTypeOther = map["ReportTypeOther"];
+    information = map["Information"];
 
     warningSelectProvince = map["WarningSelectProvince"];
     warningMaximumUploadSize = map["WarningMaximumUploadSize"];

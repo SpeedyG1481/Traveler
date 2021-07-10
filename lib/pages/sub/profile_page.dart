@@ -368,7 +368,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: Center(
                 child: StandartTextField(
-                  border: false,
+                  borderBool: false,
                   editingController: usernameController,
                   color: Colors.white,
                   hintText: user.displayName != null

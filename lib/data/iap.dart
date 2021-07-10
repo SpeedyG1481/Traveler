@@ -6,7 +6,7 @@ import 'package:traveler/pages/sub/market_page.dart';
 class IAP {
   static Future<void> buyRemoveAds() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    await preferences.setBool("RemovedAds", true);
+    await preferences.setBool("RemoveAds", true);
     Constants.canRemoveAds = true;
   }
 
@@ -17,14 +17,17 @@ class IAP {
   }
 
   static Future<bool> canReloadQuickness() async {
+    if (Constants.debugMode) return true;
+
     SharedPreferences preferences = await SharedPreferences.getInstance();
     return preferences.containsKey("ReloadQuickness") &&
         preferences.getBool("ReloadQuickness");
   }
 
   static Future<bool> canRemoveAds() async {
+    if (Constants.debugMode) return true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    return preferences.containsKey("RemovedAds") &&
+    return preferences.containsKey("RemoveAds") &&
         preferences.getBool("RemoveAds");
   }
 
@@ -32,7 +35,7 @@ class IAP {
     SharedPreferences preferences = await SharedPreferences.getInstance();
 
     if (id == removeAdsId) {
-      return preferences.containsKey("RemovedAds") &&
+      return preferences.containsKey("RemoveAds") &&
           preferences.getBool("RemoveAds");
     } else if (id == reloadQuicknessId) {
       return preferences.containsKey("ReloadQuickness") &&

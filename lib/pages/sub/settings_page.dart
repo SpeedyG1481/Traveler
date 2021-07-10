@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 import 'package:traveler/audio/audio_controller.dart';
+import 'package:traveler/data/func.dart';
 import 'package:traveler/data/images.dart';
 import 'package:traveler/language/language.dart';
 import 'package:traveler/language/language_enum.dart';
@@ -54,7 +57,7 @@ class _SettingsPageState extends State<SettingsPage> {
             padding: EdgeInsets.all(
               10,
             ),
-            height: height / 1.5,
+            height: height / 1.4,
             width: width / 1.25,
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(
@@ -67,6 +70,57 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Show Correct Answers",
+                        maxLines: 2,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Expanded(
+                      child: FutureBuilder(
+                        future: Functions.showCorrectAnswers(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData)
+                            return SpinKitDualRing(
+                              color: Color(0xff195FA9),
+                              size: 30,
+                            );
+
+                          return Checkbox(
+                            value: snapshot.data,
+                            fillColor: MaterialStateProperty.all(
+                              Color(0xff195FA9),
+                            ),
+                            checkColor: Colors.white,
+                            onChanged: (value) async {
+                              SharedPreferences preferences =
+                                  await SharedPreferences.getInstance();
+                              setState(() {
+                                preferences.setBool(
+                                    "ShowCorrectAnswers", value);
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 25,
+                ),
                 Expanded(
                   child: Column(
                     children: [

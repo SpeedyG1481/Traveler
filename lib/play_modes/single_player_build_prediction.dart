@@ -1,20 +1,26 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:http/http.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:traveler/audio/audio_controller.dart';
+import 'package:traveler/components/standart_text_field.dart';
 import 'package:traveler/data/ads.dart';
 import 'package:traveler/data/audio_files.dart';
 import 'package:traveler/data/constants.dart';
 import 'package:traveler/data/data_model.dart';
 import 'package:traveler/data/database_controller.dart';
+import 'package:traveler/data/func.dart';
 import 'package:traveler/data/images.dart';
+import 'package:traveler/data/report_types.dart';
 import 'package:traveler/language/language.dart';
 import 'package:traveler/models/city.dart';
 import 'package:traveler/models/country.dart';
@@ -30,13 +36,15 @@ class SinglePlayerBuildPrediction extends StatefulWidget {
 
 class _SinglePlayerBuildPredictionState
     extends State<SinglePlayerBuildPrediction> {
+  TextEditingController reportController = TextEditingController();
+
   InterstitialAd playGameInterstitial;
   BannerAd playGameBannerAd;
 
   DateTime currentBackPressTime;
 
   List<Question> questions = [];
-  bool isLoading = true;
+
   Timer timer;
 
   int round = 0;
@@ -49,12 +57,18 @@ class _SinglePlayerBuildPredictionState
   int indexOfSelected = 0;
   int trueAnswerIndex = 0;
 
+  bool isLoading = true;
   bool freeze = false;
+  bool reportFreeze = false;
+  bool reportSending = false;
+  bool roundReportSendStatus = false;
 
   bool onlyOne = true;
 
   int trueCount = 0;
   int falseCount = 0;
+
+  String selectedReportType = ReportTypes.getList()[0];
 
   Future loadAd() async {
     if (Constants.canRemoveAds) {
@@ -145,9 +159,17 @@ class _SinglePlayerBuildPredictionState
                     bottom: 3,
                   ),
                   width: width,
-                  height: 60,
+                  height: 62.5,
                   decoration: BoxDecoration(
                     color: Color(0xff066DBC),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(
+                        100,
+                      ),
+                      bottomRight: Radius.circular(
+                        100,
+                      ),
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -326,7 +348,7 @@ class _SinglePlayerBuildPredictionState
           ),
         ),
       );
-    else
+    else {
       return Column(
         children: [
           SizedBox(
@@ -369,14 +391,142 @@ class _SinglePlayerBuildPredictionState
                     ),
                   ),
                 ),
-                Positioned(
-                  top: 4,
-                  left: 4,
-                  child: Image(
-                    height: 30,
-                    image: Images.playGameTopLeftDecoration2,
+                if (!roundReportSendStatus)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        if (reportFreeze || reportSending) return;
+
+                        setState(() {
+                          reportFreeze = true;
+                        });
+
+                        AwesomeDialog(
+                          btnOkText: "Gönder",
+                          btnCancelText: Language.cancel,
+                          context: context,
+                          dismissOnTouchOutside: false,
+                          dismissOnBackKeyPress: false,
+                          dialogType: DialogType.QUESTION,
+                          animType: AnimType.BOTTOMSLIDE,
+                          title: Language.contract,
+                          body: StatefulBuilder(
+                            builder: (context, newSetState) {
+                              return Column(
+                                children: [
+                                  Text(
+                                    "SORU RAPORLAMA",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 23,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          "Reason: ",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Expanded(
+                                          child: DropdownButton<String>(
+                                            value: selectedReportType,
+                                            underline: Container(
+                                              height: 2,
+                                              color: Colors.black,
+                                            ),
+                                            iconSize: 0,
+                                            elevation: 16,
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                            onChanged: (String newValue) {
+                                              newSetState(() {
+                                                selectedReportType = newValue;
+                                              });
+                                            },
+                                            items: ReportTypes.getList()
+                                                .map<DropdownMenuItem<String>>(
+                                                    (String value) {
+                                              return DropdownMenuItem<String>(
+                                                value: value,
+                                                child: Text(value),
+                                              );
+                                            }).toList(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (selectedReportType ==
+                                      ReportTypes.getName(ReportTypes.OTHER))
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                  if (selectedReportType ==
+                                      ReportTypes.getName(ReportTypes.OTHER))
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                      ),
+                                      child: StandartTextField(
+                                        color: Colors.black,
+                                        editingController: reportController,
+                                        borderBool: true,
+                                        hintText: "Description",
+                                        maxLength: 500,
+                                        maxLines: 5,
+                                        minLines: 3,
+                                        counter: true,
+                                        textStyle: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                          btnOkOnPress: () {
+                            sendReport();
+
+                            setState(() {
+                              reportFreeze = false;
+                            });
+                          },
+                          btnCancelOnPress: () {
+                            setState(() {
+                              reportFreeze = false;
+                            });
+                          },
+                        )..show();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Color(0xffff9900),
+                        radius: 19,
+                        child: Icon(
+                          MdiIcons.alertDecagram,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -430,6 +580,7 @@ class _SinglePlayerBuildPredictionState
           ),
         ],
       );
+    }
   }
 
   List<Widget> getAnswers() {
@@ -505,8 +656,11 @@ class _SinglePlayerBuildPredictionState
           ),
           height: 50,
           child: Center(
-            child: Text(
+            child: AutoSizeText(
               name,
+              maxLines: 1,
+              minFontSize: 15,
+              maxFontSize: 20,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
@@ -626,6 +780,9 @@ class _SinglePlayerBuildPredictionState
     roundTimer = time + Constants.BuildPredictionSinglePlayerQuestionTimer;
     setState(() {
       round++;
+      roundReportSendStatus = false;
+      reportFreeze = false;
+      reportSending = false;
     });
 
     if (round == Constants.BuildPredictionSinglePlayerRoundCount) {
@@ -671,6 +828,8 @@ class _SinglePlayerBuildPredictionState
   void loadTimer() {
     if (timer == null)
       timer = Timer.periodic(Duration(seconds: 1), (timer) {
+        if (reportFreeze) return;
+
         if (freeze) {
           if (freezeCounter == 0) {
             freezeCounter = 4;
@@ -679,8 +838,23 @@ class _SinglePlayerBuildPredictionState
           freezeCounter--;
 
           if (freezeCounter == 0) {
-            freeze = false;
-            nextRound(isTrue: indexOfSelected == trueAnswerIndex);
+            Functions.showCorrectAnswers().then((value) {
+              bool isTrue = indexOfSelected == trueAnswerIndex;
+              if (value && !isTrue) {
+                AwesomeDialog(
+                  btnOkText: Language.okey,
+                  context: context,
+                  dialogType: DialogType.QUESTION,
+                  animType: AnimType.BOTTOMSLIDE,
+                  title: Language.information,
+                  desc: Language.emailOrPasswordSyntaxError,
+                  btnOkOnPress: () {},
+                )..show();
+              } else {
+                freeze = false;
+                nextRound(isTrue: isTrue);
+              }
+            });
           }
 
           return;
@@ -723,5 +897,64 @@ class _SinglePlayerBuildPredictionState
       ),
       (Route<dynamic> route) => false,
     );
+  }
+
+  void sendReport() async {
+    setState(() {
+      reportSending = true;
+    });
+
+    String description = reportController.text;
+    int reportTypeId = ReportTypes.getIndex(selectedReportType);
+    if (ReportTypes.OTHER == reportTypeId) {
+      if (description.length <= 10) {
+        Fluttertoast.showToast(
+          msg:
+              "Diğer seçeneğini seçtiğinizde en az 10 karakter açıklama girmeniz gereklidir.",
+          timeInSecForIosWeb: 3,
+        );
+        setState(() {
+          reportSending = false;
+        });
+        return;
+      }
+    }
+
+    Question question = questions[round];
+
+    Response response = await post(
+      Uri.parse(
+        Constants.userSendReportUrl,
+      ),
+      body: {
+        "description": description,
+        "securityToken": Constants.securityToken,
+        "uploader": await Functions.getDeviceDetails(),
+        "reportTypeId": reportTypeId.toString(),
+        "questionId": question.questionId.toString(),
+      },
+    );
+
+    if (response.statusCode == 200 &&
+        (response.body == "1" || response.body == "true")) {
+      Fluttertoast.showToast(
+        msg:
+            "Rapor başarılı bir şekilde gönderildi! Yardımınız için teşekkür ederiz :)",
+        timeInSecForIosWeb: 3,
+      );
+      setState(() {
+        roundReportSendStatus = true;
+      });
+    } else {
+      Fluttertoast.showToast(
+        msg: "Sanırım birşeyler ters gitti, rapor gönderilemedi.",
+        timeInSecForIosWeb: 3,
+      );
+    }
+
+    setState(() {
+      reportSending = false;
+    });
+    reportController.clear();
   }
 }

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:styled_text/styled_text.dart';
 import 'package:traveler/data/constants.dart';
 import 'package:traveler/main.dart';
@@ -157,4 +158,11 @@ class Functions {
       },
     );
   }
+
+  static Future<bool> showCorrectAnswers() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    return preferences.containsKey("ShowCorrectAnswers") &&
+        preferences.getBool("ShowCorrectAnswers");
+  }
+
 }

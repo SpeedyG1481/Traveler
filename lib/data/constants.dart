@@ -1,7 +1,7 @@
 import 'package:traveler/language/language.dart';
 
 class Constants {
-  static const bool debugMode = false;
+  static const bool debugMode = true;
   static const int BuildPredictionSinglePlayerRoundCount = 10;
 
   static const int BuildPredictionSinglePlayerQuestionTimer = 45;
@@ -35,6 +35,9 @@ class Constants {
 
   static String userImageUploadURL =
       siteUrl + "/api/games/traveler/upload_new_image.php";
+
+  static String userSendReportUrl =
+      siteUrl + "/api/games/traveler/new_report.php";
 
   static String fullOverText = "FULLOVERTEXT";
 }
