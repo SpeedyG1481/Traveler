@@ -11,6 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:styled_text/styled_text.dart';
 import 'package:traveler/audio/audio_controller.dart';
 import 'package:traveler/components/standart_text_field.dart';
 import 'package:traveler/data/ads.dart';
@@ -62,6 +63,7 @@ class _SinglePlayerBuildPredictionState
   bool reportFreeze = false;
   bool reportSending = false;
   bool roundReportSendStatus = false;
+  bool roundFreezer = false;
 
   bool onlyOne = true;
 
@@ -404,7 +406,7 @@ class _SinglePlayerBuildPredictionState
                         });
 
                         AwesomeDialog(
-                          btnOkText: "Gönder",
+                          btnOkText: Language.send,
                           btnCancelText: Language.cancel,
                           context: context,
                           dismissOnTouchOutside: false,
@@ -417,7 +419,7 @@ class _SinglePlayerBuildPredictionState
                               return Column(
                                 children: [
                                   Text(
-                                    "SORU RAPORLAMA",
+                                    Language.reportQuestion,
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 23,
@@ -431,7 +433,7 @@ class _SinglePlayerBuildPredictionState
                                     child: Row(
                                       children: [
                                         Text(
-                                          "Reason: ",
+                                          Language.reason + ": ",
                                           style: TextStyle(
                                             color: Colors.black,
                                             fontWeight: FontWeight.w500,
@@ -486,7 +488,7 @@ class _SinglePlayerBuildPredictionState
                                         color: Colors.black,
                                         editingController: reportController,
                                         borderBool: true,
-                                        hintText: "Description",
+                                        hintText: Language.description,
                                         maxLength: 500,
                                         maxLines: 5,
                                         minLines: 3,
@@ -634,7 +636,7 @@ class _SinglePlayerBuildPredictionState
         child: Container(
           width: width / 1.2,
           padding: EdgeInsets.symmetric(
-            horizontal: 10,
+            horizontal: 4.5,
           ),
           decoration: BoxDecoration(
             border: freeze
@@ -658,7 +660,7 @@ class _SinglePlayerBuildPredictionState
           child: Center(
             child: AutoSizeText(
               name,
-              maxLines: 1,
+              maxLines: 2,
               minFontSize: 15,
               maxFontSize: 20,
               textAlign: TextAlign.center,
@@ -760,29 +762,33 @@ class _SinglePlayerBuildPredictionState
       });
   }
 
-  void nextRound({bool isTrue}) {
+  void sendPoint({bool isTrue}) {
+    //CHECK ROUND + 1 BECAUSE ROUND NOT INCREASED NOW
+    bool canPlayAudio =
+        (round + 1 != Constants.BuildPredictionSinglePlayerRoundCount);
+
     if (isTrue != null) {
       if (isTrue) {
-        AudioController.playSoundEffect(AudioFiles.TrueSound);
-        // Increase point
+        if (canPlayAudio) AudioController.playSoundEffect(AudioFiles.TrueSound);
         point += roundTimer - time;
       } else {
-        AudioController.playSoundEffect(AudioFiles.FalseSound);
-        // Dont edit point
+        if (canPlayAudio)
+          AudioController.playSoundEffect(AudioFiles.FalseSound);
       }
     } else {
-      Fluttertoast.showToast(
-        msg: Language.noMoreTimes,
-      );
-      AudioController.playSoundEffect(AudioFiles.FalseSound);
+      Fluttertoast.showToast(msg: Language.noMoreTimes, timeInSecForIosWeb: 3);
+      if (canPlayAudio) AudioController.playSoundEffect(AudioFiles.FalseSound);
     }
+  }
 
+  void nextRound() {
     roundTimer = time + Constants.BuildPredictionSinglePlayerQuestionTimer;
     setState(() {
       round++;
       roundReportSendStatus = false;
       reportFreeze = false;
       reportSending = false;
+      roundFreezer = false;
     });
 
     if (round == Constants.BuildPredictionSinglePlayerRoundCount) {
@@ -831,28 +837,101 @@ class _SinglePlayerBuildPredictionState
         if (reportFreeze) return;
 
         if (freeze) {
-          if (freezeCounter == 0) {
+          if (freezeCounter == 0 && !roundFreezer) {
             freezeCounter = 4;
           }
 
-          freezeCounter--;
+          if (!roundFreezer) freezeCounter--;
 
-          if (freezeCounter == 0) {
+          if (freezeCounter == 0 && !roundFreezer) {
+            roundFreezer = true;
             Functions.showCorrectAnswers().then((value) {
               bool isTrue = indexOfSelected == trueAnswerIndex;
+              //SOUND AND POİNT
+              sendPoint(isTrue: isTrue);
+
               if (value && !isTrue) {
+                Question question = questions[round];
                 AwesomeDialog(
-                  btnOkText: Language.okey,
+                  btnOkText: Language.continueGame,
                   context: context,
                   dialogType: DialogType.QUESTION,
+                  dismissOnTouchOutside: false,
+                  dismissOnBackKeyPress: false,
                   animType: AnimType.BOTTOMSLIDE,
-                  title: Language.information,
-                  desc: Language.emailOrPasswordSyntaxError,
-                  btnOkOnPress: () {},
+                  body: Column(
+                    children: [
+                      Text(
+                        Language.information,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 22,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 25,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7.5,
+                        ),
+                        child: Container(
+                          height: 200,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(
+                              15,
+                            ),
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                question.photoUrl,
+                              ),
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      StyledText(
+                        text: Language.correctAnswerDescription
+                            .replaceAll("<arg_1>", question.city.name)
+                            .replaceAll("<arg_2>", question.city.state.name)
+                            .replaceAll("<arg_3>", question.city.country.name)
+                            .replaceAll("<arg_4>", question.uploaderName),
+                        tags: {
+                          "header": StyledTextTag(
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          "content": StyledTextTag(
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        },
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  btnOkOnPress: () {
+                    freeze = false;
+                    nextRound();
+                  },
                 )..show();
               } else {
                 freeze = false;
-                nextRound(isTrue: isTrue);
+                nextRound();
               }
             });
           }
@@ -867,6 +946,8 @@ class _SinglePlayerBuildPredictionState
             });
 
           if (roundTimer - time <= 0) {
+            bool isTrue = indexOfSelected == trueAnswerIndex;
+            sendPoint(isTrue: isTrue);
             nextRound();
           }
         } else {
@@ -909,8 +990,7 @@ class _SinglePlayerBuildPredictionState
     if (ReportTypes.OTHER == reportTypeId) {
       if (description.length <= 10) {
         Fluttertoast.showToast(
-          msg:
-              "Diğer seçeneğini seçtiğinizde en az 10 karakter açıklama girmeniz gereklidir.",
+          msg: Language.mustTypeCharacterWhenOtherSelected,
           timeInSecForIosWeb: 3,
         );
         setState(() {
@@ -938,8 +1018,7 @@ class _SinglePlayerBuildPredictionState
     if (response.statusCode == 200 &&
         (response.body == "1" || response.body == "true")) {
       Fluttertoast.showToast(
-        msg:
-            "Rapor başarılı bir şekilde gönderildi! Yardımınız için teşekkür ederiz :)",
+        msg: Language.reportQuestionSuccess,
         timeInSecForIosWeb: 3,
       );
       setState(() {
@@ -947,7 +1026,7 @@ class _SinglePlayerBuildPredictionState
       });
     } else {
       Fluttertoast.showToast(
-        msg: "Sanırım birşeyler ters gitti, rapor gönderilemedi.",
+        msg: Language.reportQuestionFailed,
         timeInSecForIosWeb: 3,
       );
     }

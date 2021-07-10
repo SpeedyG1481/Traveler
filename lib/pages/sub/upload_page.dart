@@ -152,7 +152,10 @@ class _UploadPageState extends State<UploadPage> {
     });
 
     if (uploadimage == null || _currentCity == null) {
-      Fluttertoast.showToast(msg: Language.warningSelectProvince);
+      Fluttertoast.showToast(
+        msg: Language.warningSelectProvince,
+        timeInSecForIosWeb: 2,
+      );
       setState(() {
         isUploading = false;
       });
@@ -163,7 +166,10 @@ class _UploadPageState extends State<UploadPage> {
 
     var image = await decodeImageFromList(imageBytes);
     if (image.width < image.height) {
-      Fluttertoast.showToast(msg: Language.warningUploadPhotoMustLandscape);
+      Fluttertoast.showToast(
+        msg: Language.warningUploadPhotoMustLandscape,
+        timeInSecForIosWeb: 2,
+      );
       setState(() {
         isUploading = false;
       });
@@ -172,8 +178,10 @@ class _UploadPageState extends State<UploadPage> {
     int size = imageBytes.length;
     if (size > Constants.MaximumUploadSizeBytes) {
       Fluttertoast.showToast(
-          msg: Language.warningMaximumUploadSize.replaceAll(
-              "<arg_1>", Constants.MaximumUploadSizeMegaBytes.toString()));
+        msg: Language.warningMaximumUploadSize.replaceAll(
+            "<arg_1>", Constants.MaximumUploadSizeMegaBytes.toString()),
+        timeInSecForIosWeb: 2,
+      );
       setState(() {
         isUploading = false;
       });

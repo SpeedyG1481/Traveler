@@ -107,13 +107,14 @@ class Functions {
             ),
             child: StyledText(
               text: "<big>•</big> " + contentIn,
-              // ignore: deprecated_member_use
-              styles: {
-                "big": TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                )
+              tags: {
+                "big": StyledTextTag(
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               },
               style: TextStyle(
                 color: Colors.black,
@@ -164,5 +165,4 @@ class Functions {
     return preferences.containsKey("ShowCorrectAnswers") &&
         preferences.getBool("ShowCorrectAnswers");
   }
-
 }

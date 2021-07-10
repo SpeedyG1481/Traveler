@@ -250,7 +250,7 @@ class _ModeSelectionPageState extends State<ModeSelectionPage>
                             btnCancelOnPress: () {},
                           )..show();
 
-                          Fluttertoast.showToast(msg: Language.noHealthForGame);
+                          Fluttertoast.showToast(msg: Language.noHealthForGame,timeInSecForIosWeb: 3);
                         }
                       },
                       child: Container(
@@ -295,6 +295,7 @@ class _ModeSelectionPageState extends State<ModeSelectionPage>
                       onTap: () {
                         Fluttertoast.showToast(
                           msg: Language.warningMultiplayerComingSoon,
+                          timeInSecForIosWeb: 3
                         );
                       },
                       child: Container(

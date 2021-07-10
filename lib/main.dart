@@ -27,6 +27,11 @@ void main() async {
 
   analytics = FirebaseAnalytics();
   await Firebase.initializeApp();
+  IAP.canRemoveAds().then((value) {
+    if (value != null) {
+      Constants.canRemoveAds = value;
+    }
+  });
 
   runApp(
     MaterialApp(
@@ -43,9 +48,5 @@ void main() async {
       home: FirstSplashScreen(),
     ),
   );
-  IAP.canRemoveAds().then((value) {
-    if (value != null) {
-      Constants.canRemoveAds = value;
-    }
-  });
+
 }

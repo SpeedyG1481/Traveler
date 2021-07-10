@@ -70,53 +70,73 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "Show Correct Answers",
-                        maxLines: 2,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                Tooltip(
+                  message: Language.showCorrectAnswersTooltip,
+                  padding: EdgeInsets.all(
+                    10,
+                  ),
+                  margin: EdgeInsets.all(10),
+                  showDuration: Duration(seconds: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(
+                      10,
+                    ),
+                  ),
+                  textStyle: TextStyle(
+                    color: Color(
+                      0xff1C88FF,
+                    ),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          Language.showCorrectAnswers,
+                          maxLines: 2,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 19,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    SizedBox(
-                      width: 15,
-                    ),
-                    Expanded(
-                      child: FutureBuilder(
-                        future: Functions.showCorrectAnswers(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData)
-                            return SpinKitDualRing(
-                              color: Color(0xff195FA9),
-                              size: 30,
-                            );
+                      SizedBox(
+                        width: 15,
+                      ),
+                      Expanded(
+                        child: FutureBuilder(
+                          future: Functions.showCorrectAnswers(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData)
+                              return SpinKitDualRing(
+                                color: Color(0xff195FA9),
+                                size: 30,
+                              );
 
-                          return Checkbox(
-                            value: snapshot.data,
-                            fillColor: MaterialStateProperty.all(
-                              Color(0xff195FA9),
-                            ),
-                            checkColor: Colors.white,
-                            onChanged: (value) async {
-                              SharedPreferences preferences =
-                                  await SharedPreferences.getInstance();
-                              setState(() {
-                                preferences.setBool(
-                                    "ShowCorrectAnswers", value);
-                              });
-                            },
-                          );
-                        },
+                            return Checkbox(
+                              value: snapshot.data,
+                              fillColor: MaterialStateProperty.all(
+                                Color(0xff195FA9),
+                              ),
+                              checkColor: Colors.white,
+                              onChanged: (value) async {
+                                SharedPreferences preferences =
+                                    await SharedPreferences.getInstance();
+                                setState(() {
+                                  preferences.setBool(
+                                      "ShowCorrectAnswers", value);
+                                });
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 SizedBox(
                   height: 25,

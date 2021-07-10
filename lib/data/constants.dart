@@ -1,7 +1,7 @@
 import 'package:traveler/language/language.dart';
 
 class Constants {
-  static const bool debugMode = true;
+  static const bool debugMode = false;
   static const int BuildPredictionSinglePlayerRoundCount = 10;
 
   static const int BuildPredictionSinglePlayerQuestionTimer = 45;
@@ -13,7 +13,7 @@ class Constants {
   static const int MaximumUploadSizeBytes = MaximumUploadSizeKiloBytes * 1024;
   static const int MaximumUploadSizeKiloBytes =
       MaximumUploadSizeMegaBytes * 1024;
-  static const int MaximumUploadSizeMegaBytes = 10;
+  static const int MaximumUploadSizeMegaBytes = 5;
 
   static const String securityToken =
       "009b40a9f620361b7348824601d85fa8ae62fc9a6fd11dc1d02c2d589458526664fcac2c994c4a019bbfd28c6cfb671e3a7e8f783b7a50a1982360eacbbbe7c8";

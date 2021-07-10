@@ -96,6 +96,18 @@ class Language {
   static String reportTypeWrongData;
   static String reportTypeOther;
   static String information;
+  static String correctAnswerDescription;
+  static String continueGame;
+  static String description;
+  static String reason;
+  static String reportQuestion;
+  static String send;
+  static String mustTypeCharacterWhenOtherSelected;
+  static String reportQuestionSuccess;
+  static String reportQuestionFailed;
+  static String checkConnection;
+  static String showCorrectAnswers;
+  static String showCorrectAnswersTooltip;
 
   static String warningSelectProvince;
   static String warningMaximumUploadSize;
@@ -230,6 +242,18 @@ class Language {
     reportTypeWrongData = map["ReportTypeWrongData"];
     reportTypeOther = map["ReportTypeOther"];
     information = map["Information"];
+    correctAnswerDescription = map["CorrectAnswerDescription"];
+    continueGame = map["ContinueGame"];
+    description = map["Description"];
+    reason = map["Reason"];
+    reportQuestion = map["ReportQuestion"];
+    send = map["Send"];
+    mustTypeCharacterWhenOtherSelected = map["MustTypeCharacterWhenOtherSelected"];
+    reportQuestionSuccess = map["ReportQuestionSuccess"];
+    reportQuestionFailed = map["ReportQuestionFailed"];
+    checkConnection = map["CheckConnection"];
+    showCorrectAnswers = map["ShowCorrectAnswers"];
+    showCorrectAnswersTooltip = map["ShowCorrectAnswersTooltip"];
 
     warningSelectProvince = map["WarningSelectProvince"];
     warningMaximumUploadSize = map["WarningMaximumUploadSize"];
