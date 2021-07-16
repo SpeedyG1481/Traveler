@@ -108,6 +108,10 @@ class Language {
   static String checkConnection;
   static String showCorrectAnswers;
   static String showCorrectAnswersTooltip;
+  static String areYouSure;
+  static String areYouSureFormLockQuestion;
+  static String yes;
+  static String no;
 
   static String warningSelectProvince;
   static String warningMaximumUploadSize;
@@ -254,6 +258,10 @@ class Language {
     checkConnection = map["CheckConnection"];
     showCorrectAnswers = map["ShowCorrectAnswers"];
     showCorrectAnswersTooltip = map["ShowCorrectAnswersTooltip"];
+    areYouSure = map["AreYouSure"];
+    areYouSureFormLockQuestion = map["AreYouSureFormLockQuestion"];
+    yes = map["Yes"];
+    no = map["No"];
 
     warningSelectProvince = map["WarningSelectProvince"];
     warningMaximumUploadSize = map["WarningMaximumUploadSize"];

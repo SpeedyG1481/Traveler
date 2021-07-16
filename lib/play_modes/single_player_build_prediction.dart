@@ -411,7 +411,7 @@ class _SinglePlayerBuildPredictionState
                           context: context,
                           dismissOnTouchOutside: false,
                           dismissOnBackKeyPress: false,
-                          dialogType: DialogType.QUESTION,
+                          dialogType: DialogType.WARNING,
                           animType: AnimType.BOTTOMSLIDE,
                           title: Language.contract,
                           body: StatefulBuilder(
@@ -623,15 +623,28 @@ class _SinglePlayerBuildPredictionState
         ),
         onTap: () {
           if (freeze) return;
-          setState(() {
-            indexOfSelected = index;
-            freeze = true;
-          });
-          if (indexOfSelected == trueAnswerIndex) {
-            trueCount++;
-          } else {
-            falseCount++;
-          }
+
+          AwesomeDialog(
+            btnOkText: Language.yes,
+            btnCancelText: Language.no,
+            context: context,
+            dialogType: DialogType.QUESTION,
+            animType: AnimType.BOTTOMSLIDE,
+            title: Language.areYouSure,
+            desc: Language.areYouSureFormLockQuestion,
+            btnOkOnPress: () {
+              setState(() {
+                indexOfSelected = index;
+                freeze = true;
+              });
+              if (indexOfSelected == trueAnswerIndex) {
+                trueCount++;
+              } else {
+                falseCount++;
+              }
+            },
+            btnCancelOnPress: () {},
+          )..show();
         },
         child: Container(
           width: width / 1.2,
@@ -855,7 +868,7 @@ class _SinglePlayerBuildPredictionState
                 AwesomeDialog(
                   btnOkText: Language.continueGame,
                   context: context,
-                  dialogType: DialogType.QUESTION,
+                  dialogType: DialogType.INFO_REVERSED,
                   dismissOnTouchOutside: false,
                   dismissOnBackKeyPress: false,
                   animType: AnimType.BOTTOMSLIDE,

@@ -25,7 +25,6 @@ class _MarketPageState extends State<MarketPage> {
   StreamSubscription<List<PurchaseDetails>> _subscription;
   List<ProductDetails> products = [];
 
-  bool firstLoading = true;
   bool canBuyOnThisPhone = false;
   bool restoreLoading = false;
 
@@ -44,7 +43,7 @@ class _MarketPageState extends State<MarketPage> {
     setState(() {
       products = response.productDetails;
     });
-    print("IAP Products Listed... Length: " + products.length.toString());
+    print("IAP Products Listed... Count: " + products.length.toString());
   }
 
   Future<void> getPastPurchases() async {
@@ -62,13 +61,9 @@ class _MarketPageState extends State<MarketPage> {
   }
 
   void initalizeIAP() async {
-    setState(() {
-      firstLoading = true;
-    });
     canBuyOnThisPhone = await iap.isAvailable();
     if (canBuyOnThisPhone) {
       await getProducts();
-      await getPastPurchases();
 
       final Stream purchaseUpdated = iap.purchaseStream;
       _subscription = purchaseUpdated.listen((purchaseDetailsList) {
@@ -79,9 +74,8 @@ class _MarketPageState extends State<MarketPage> {
         canBuyOnThisPhone = false;
       });
     }
-    setState(() {
-      firstLoading = false;
-    });
+
+    setState(() {});
   }
 
   void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
@@ -136,376 +130,374 @@ class _MarketPageState extends State<MarketPage> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                firstLoading
+                !canBuyOnThisPhone
                     ? Center(
-                        child: SpinKitFadingFour(
-                          color: Colors.white,
+                        child: Container(
+                          padding: EdgeInsets.all(
+                            10,
+                          ),
+                          width: width / 1.25,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(
+                              10,
+                            ),
+                          ),
+                          child: Text(
+                            Language.canNotBuyOnThisPhone,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       )
-                    : !canBuyOnThisPhone
-                        ? Center(
-                            child: Container(
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Tooltip(
+                              message: Language.removeAdsTooltip,
                               padding: EdgeInsets.all(
                                 10,
                               ),
-                              width: width / 1.25,
+                              margin: EdgeInsets.all(10),
+                              showDuration: Duration(seconds: 5),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(
                                   10,
                                 ),
                               ),
-                              child: Text(
-                                Language.canNotBuyOnThisPhone,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                              textStyle: TextStyle(
+                                color: Color(
+                                  0xff1C88FF,
+                                ),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  if (await IAP.hasPurchased(removeAdsId)) {
+                                    AwesomeDialog(
+                                      btnOkText: Language.okey,
+                                      context: context,
+                                      dialogType: DialogType.WARNING,
+                                      btnOkColor: Colors.orange,
+                                      animType: AnimType.BOTTOMSLIDE,
+                                      title: Language.warning,
+                                      desc: Language.iapAlreadyPurchased,
+                                      btnOkOnPress: () {},
+                                    )..show();
+                                    return;
+                                  }
+
+                                  //REMOVE ADS
+                                  ProductDetails removeAdsDetails =
+                                      getProductByName(removeAdsId);
+
+                                  final PurchaseParam purchaseParam =
+                                      PurchaseParam(
+                                          productDetails: removeAdsDetails);
+                                  await InAppPurchase.instance.buyNonConsumable(
+                                      purchaseParam: purchaseParam);
+                                },
+                                child: Center(
+                                  child: Container(
+                                    padding: EdgeInsets.only(
+                                      left: 25,
+                                      right: 25,
+                                      bottom: 0,
+                                    ),
+                                    width: width / 1.5,
+                                    height: height / 4,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          image: Images.marketVIP1),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        AutoSizeText(
+                                          Language.removeAdsLine1,
+                                          maxLines: 1,
+                                          maxFontSize: 40,
+                                          minFontSize: 30,
+                                          style: TextStyle(
+                                            fontSize: 40,
+                                            fontWeight: FontWeight.bold,
+                                            foreground: Paint()
+                                              ..shader = LinearGradient(
+                                                colors: <Color>[
+                                                  Color(0xffE26600),
+                                                  Color(0xffFFE91C),
+                                                  Color(0xffFFE91C),
+                                                  Color(0xffFFE91C),
+                                                  Color(0xffFF9700),
+                                                  Color(0xffFF9700),
+                                                  Color(0xffE26600),
+                                                ],
+                                              ).createShader(
+                                                Rect.fromLTWH(
+                                                  70.0,
+                                                  50.0,
+                                                  200.0,
+                                                  70.0,
+                                                ),
+                                              ),
+                                          ),
+                                        ),
+                                        AutoSizeText(
+                                          Language.removeAdsLine2,
+                                          maxLines: 1,
+                                          maxFontSize: 40,
+                                          minFontSize: 30,
+                                          style: TextStyle(
+                                            fontSize: 40,
+                                            fontWeight: FontWeight.bold,
+                                            foreground: Paint()
+                                              ..shader = LinearGradient(
+                                                colors: <Color>[
+                                                  Color(0xffE26600),
+                                                  Color(0xffFFE91C),
+                                                  Color(0xffFFE91C),
+                                                  Color(0xffFFE91C),
+                                                  Color(0xffFF9700),
+                                                  Color(0xffFF9700),
+                                                  Color(0xffE26600),
+                                                ],
+                                              ).createShader(
+                                                Rect.fromLTWH(
+                                                  0.0,
+                                                  65.0,
+                                                  130.0,
+                                                  70.0,
+                                                ),
+                                              ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        Center(
+                                          child: FutureBuilder(
+                                            future:
+                                                IAP.hasPurchased(removeAdsId),
+                                            builder: (context, data) {
+                                              if (!data.hasData) {
+                                                return SpinKitDualRing(
+                                                    color: Colors.white);
+                                              }
+
+                                              return products != null &&
+                                                      products.length > 0
+                                                  ? AutoSizeText(
+                                                      data.data
+                                                          ? Language.purchased
+                                                          : getProductByName(
+                                                                  removeAdsId)
+                                                              .price,
+                                                      maxLines: 1,
+                                                      maxFontSize: 35,
+                                                      minFontSize: 25,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 35,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    )
+                                                  : SpinKitDualRing(
+                                                      color: Colors.white);
+                                            },
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Tooltip(
+                              message: Language.reloadQuicknessTooltip,
+                              padding: EdgeInsets.all(
+                                10,
+                              ),
+                              margin: EdgeInsets.all(10),
+                              showDuration: Duration(seconds: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(
+                                  10,
+                                ),
+                              ),
+                              textStyle: TextStyle(
+                                color: Color(
+                                  0xff1C88FF,
+                                ),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  if (await IAP
+                                      .hasPurchased(reloadQuicknessId)) {
+                                    AwesomeDialog(
+                                      btnOkText: Language.okey,
+                                      context: context,
+                                      dialogType: DialogType.WARNING,
+                                      btnOkColor: Colors.orange,
+                                      animType: AnimType.BOTTOMSLIDE,
+                                      title: Language.warning,
+                                      desc: Language.iapAlreadyPurchased,
+                                      btnOkOnPress: () {},
+                                    )..show();
+                                    return;
+                                  }
+                                  //RELOAD QUICKNESS
+
+                                  ProductDetails reloadQuicknessDetails =
+                                      getProductByName(reloadQuicknessId);
+
+                                  final PurchaseParam purchaseParam =
+                                      PurchaseParam(
+                                          productDetails:
+                                              reloadQuicknessDetails);
+                                  InAppPurchase.instance.buyNonConsumable(
+                                      purchaseParam: purchaseParam);
+                                },
+                                child: Center(
+                                  child: Container(
+                                    padding: EdgeInsets.only(
+                                      left: 25,
+                                      right: 25,
+                                    ),
+                                    width: width / 1.5,
+                                    height: height / 4,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          image: Images.marketVIP2),
+                                    ),
+                                    child: Center(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          AutoSizeText(
+                                            Language.reloadQuicknessLine1,
+                                            maxLines: 1,
+                                            maxFontSize: 40,
+                                            minFontSize: 30,
+                                            style: TextStyle(
+                                              fontSize: 40,
+                                              fontWeight: FontWeight.bold,
+                                              foreground: Paint()
+                                                ..shader = LinearGradient(
+                                                  colors: <Color>[
+                                                    Color(0xffE26600),
+                                                    Color(0xffFFE91C),
+                                                    Color(0xffFFE91C),
+                                                    Color(0xffFFE91C),
+                                                    Color(0xffFF9700),
+                                                    Color(0xffFF9700),
+                                                    Color(0xffE26600),
+                                                  ],
+                                                ).createShader(
+                                                  Rect.fromLTWH(
+                                                    0.0,
+                                                    0.0,
+                                                    200.0,
+                                                    70.0,
+                                                  ),
+                                                ),
+                                            ),
+                                          ),
+                                          AutoSizeText(
+                                            Language.reloadQuicknessLine2,
+                                            maxLines: 1,
+                                            maxFontSize: 40,
+                                            minFontSize: 30,
+                                            style: TextStyle(
+                                              fontSize: 40,
+                                              fontWeight: FontWeight.bold,
+                                              foreground: Paint()
+                                                ..shader = LinearGradient(
+                                                  colors: <Color>[
+                                                    Color(0xffE26600),
+                                                    Color(0xffFFE91C),
+                                                    Color(0xffFFE91C),
+                                                    Color(0xffFFE91C),
+                                                    Color(0xffFF9700),
+                                                    Color(0xffFF9700),
+                                                    Color(0xffE26600),
+                                                  ],
+                                                ).createShader(
+                                                  Rect.fromLTWH(
+                                                    0.0,
+                                                    0.0,
+                                                    200.0,
+                                                    70.0,
+                                                  ),
+                                                ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 15,
+                                          ),
+                                          Center(
+                                            child: FutureBuilder(
+                                              future: IAP.hasPurchased(
+                                                  reloadQuicknessId),
+                                              builder: (context, data) {
+                                                if (!data.hasData) {
+                                                  return SpinKitDualRing(
+                                                      color: Colors.white);
+                                                }
+
+                                                return products != null &&
+                                                        products.length > 0
+                                                    ? AutoSizeText(
+                                                        data.data
+                                                            ? Language.purchased
+                                                            : getProductByName(
+                                                                    reloadQuicknessId)
+                                                                .price,
+                                                        maxLines: 1,
+                                                        maxFontSize: 35,
+                                                        minFontSize: 25,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 35,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      )
+                                                    : SpinKitDualRing(
+                                                        color: Colors.white);
+                                              },
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Tooltip(
-                                  message: Language.removeAdsTooltip,
-                                  padding: EdgeInsets.all(
-                                    10,
-                                  ),
-                                  margin: EdgeInsets.all(10),
-                                  showDuration: Duration(seconds: 5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(
-                                      10,
-                                    ),
-                                  ),
-                                  textStyle: TextStyle(
-                                    color: Color(
-                                      0xff1C88FF,
-                                    ),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  child: Center(
-                                    child: InkWell(
-                                      onTap: () async {
-                                        if (await IAP
-                                            .hasPurchased(removeAdsId)) {
-                                          AwesomeDialog(
-                                            btnOkText: Language.okey,
-                                            context: context,
-                                            dialogType: DialogType.WARNING,
-                                            btnOkColor: Colors.orange,
-                                            animType: AnimType.BOTTOMSLIDE,
-                                            title: Language.warning,
-                                            desc: Language.iapAlreadyPurchased,
-                                            btnOkOnPress: () {},
-                                          )..show();
-                                          return;
-                                        }
-
-                                        //REMOVE ADS
-                                        ProductDetails removeAdsDetails =
-                                            getProductByName(removeAdsId);
-
-                                        final PurchaseParam purchaseParam =
-                                            PurchaseParam(
-                                                productDetails:
-                                                    removeAdsDetails);
-                                        await InAppPurchase.instance
-                                            .buyNonConsumable(
-                                                purchaseParam: purchaseParam);
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.only(
-                                          top: 25,
-                                          left: 25,
-                                          right: 10,
-                                          bottom: 0,
-                                        ),
-                                        width: width / 1.5,
-                                        height: height / 4,
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                              image: Images.marketVIP1),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            AutoSizeText(
-                                              Language.removeAdsLine1,
-                                              maxLines: 1,
-                                              maxFontSize: 40,
-                                              minFontSize: 30,
-                                              style: TextStyle(
-                                                fontSize: 40,
-                                                fontWeight: FontWeight.bold,
-                                                foreground: Paint()
-                                                  ..shader = LinearGradient(
-                                                    colors: <Color>[
-                                                      Color(0xffE26600),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFF9700),
-                                                      Color(0xffFF9700),
-                                                      Color(0xffE26600),
-                                                    ],
-                                                  ).createShader(
-                                                    Rect.fromLTWH(
-                                                      70.0,
-                                                      50.0,
-                                                      200.0,
-                                                      70.0,
-                                                    ),
-                                                  ),
-                                              ),
-                                            ),
-                                            AutoSizeText(
-                                              Language.removeAdsLine2,
-                                              maxLines: 1,
-                                              maxFontSize: 40,
-                                              minFontSize: 30,
-                                              style: TextStyle(
-                                                fontSize: 40,
-                                                fontWeight: FontWeight.bold,
-                                                foreground: Paint()
-                                                  ..shader = LinearGradient(
-                                                    colors: <Color>[
-                                                      Color(0xffE26600),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFF9700),
-                                                      Color(0xffFF9700),
-                                                      Color(0xffE26600),
-                                                    ],
-                                                  ).createShader(
-                                                    Rect.fromLTWH(
-                                                      0.0,
-                                                      65.0,
-                                                      130.0,
-                                                      70.0,
-                                                    ),
-                                                  ),
-                                              ),
-                                            ),
-                                            Center(
-                                              child: FutureBuilder(
-                                                future: IAP
-                                                    .hasPurchased(removeAdsId),
-                                                builder: (context, data) {
-                                                  if (!data.hasData) {
-                                                    return SpinKitDualRing(
-                                                        color: Colors.white);
-                                                  }
-
-                                                  return products != null &&
-                                                          products.length > 0
-                                                      ? AutoSizeText(
-                                                          data.data
-                                                              ? Language
-                                                                  .purchased
-                                                              : getProductByName(
-                                                                      removeAdsId)
-                                                                  .price,
-                                                          maxLines: 1,
-                                                          maxFontSize: 35,
-                                                          minFontSize: 25,
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 35,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        )
-                                                      : SpinKitDualRing(
-                                                          color: Colors.white);
-                                                },
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Tooltip(
-                                  message: Language.reloadQuicknessTooltip,
-                                  padding: EdgeInsets.all(
-                                    10,
-                                  ),
-                                  margin: EdgeInsets.all(10),
-                                  showDuration: Duration(seconds: 5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(
-                                      10,
-                                    ),
-                                  ),
-                                  textStyle: TextStyle(
-                                    color: Color(
-                                      0xff1C88FF,
-                                    ),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  child: Center(
-                                    child: InkWell(
-                                      onTap: () async {
-                                        if (await IAP
-                                            .hasPurchased(reloadQuicknessId)) {
-                                          AwesomeDialog(
-                                            btnOkText: Language.okey,
-                                            context: context,
-                                            dialogType: DialogType.WARNING,
-                                            btnOkColor: Colors.orange,
-                                            animType: AnimType.BOTTOMSLIDE,
-                                            title: Language.warning,
-                                            desc: Language.iapAlreadyPurchased,
-                                            btnOkOnPress: () {},
-                                          )..show();
-                                          return;
-                                        }
-                                        //RELOAD QUICKNESS
-
-                                        ProductDetails reloadQuicknessDetails =
-                                            getProductByName(reloadQuicknessId);
-
-                                        final PurchaseParam purchaseParam =
-                                            PurchaseParam(
-                                                productDetails:
-                                                    reloadQuicknessDetails);
-                                        InAppPurchase.instance.buyNonConsumable(
-                                            purchaseParam: purchaseParam);
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.only(
-                                          top: 25,
-                                          left: 25,
-                                          right: 10,
-                                          bottom: 0,
-                                        ),
-                                        width: width / 1.5,
-                                        height: height / 4,
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                              image: Images.marketVIP2),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            AutoSizeText(
-                                              Language.reloadQuicknessLine1,
-                                              maxLines: 1,
-                                              maxFontSize: 40,
-                                              minFontSize: 30,
-                                              style: TextStyle(
-                                                fontSize: 40,
-                                                fontWeight: FontWeight.bold,
-                                                foreground: Paint()
-                                                  ..shader = LinearGradient(
-                                                    colors: <Color>[
-                                                      Color(0xffE26600),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFF9700),
-                                                      Color(0xffFF9700),
-                                                      Color(0xffE26600),
-                                                    ],
-                                                  ).createShader(
-                                                    Rect.fromLTWH(
-                                                      0.0,
-                                                      0.0,
-                                                      200.0,
-                                                      70.0,
-                                                    ),
-                                                  ),
-                                              ),
-                                            ),
-                                            AutoSizeText(
-                                              Language.reloadQuicknessLine2,
-                                              maxLines: 1,
-                                              maxFontSize: 40,
-                                              minFontSize: 30,
-                                              style: TextStyle(
-                                                fontSize: 40,
-                                                fontWeight: FontWeight.bold,
-                                                foreground: Paint()
-                                                  ..shader = LinearGradient(
-                                                    colors: <Color>[
-                                                      Color(0xffE26600),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFFE91C),
-                                                      Color(0xffFF9700),
-                                                      Color(0xffFF9700),
-                                                      Color(0xffE26600),
-                                                    ],
-                                                  ).createShader(
-                                                    Rect.fromLTWH(
-                                                      0.0,
-                                                      0.0,
-                                                      200.0,
-                                                      70.0,
-                                                    ),
-                                                  ),
-                                              ),
-                                            ),
-                                            Center(
-                                              child: FutureBuilder(
-                                                future: IAP.hasPurchased(
-                                                    reloadQuicknessId),
-                                                builder: (context, data) {
-                                                  if (!data.hasData) {
-                                                    return SpinKitDualRing(
-                                                        color: Colors.white);
-                                                  }
-
-                                                  return products != null &&
-                                                          products.length > 0
-                                                      ? AutoSizeText(
-                                                          data.data
-                                                              ? Language
-                                                                  .purchased
-                                                              : getProductByName(
-                                                                      reloadQuicknessId)
-                                                                  .price,
-                                                          maxLines: 1,
-                                                          maxFontSize: 35,
-                                                          minFontSize: 25,
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 35,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        )
-                                                      : SpinKitDualRing(
-                                                          color: Colors.white);
-                                                },
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
+                        ],
+                      ),
                 Positioned(
                   left: 10,
                   top: 10,
