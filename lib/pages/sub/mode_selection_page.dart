@@ -207,8 +207,9 @@ class _ModeSelectionPageState extends State<ModeSelectionPage>
                   children: [
                     GestureDetector(
                       onTap: () async {
-                        if (await HealthSystem
-                            .canPlay() /*|| Constants.debugMode*/) {
+                        bool canPlay = await HealthSystem.canPlay();
+                        bool canRemoveAds = Constants.canRemoveAds;
+                        if (canPlay /*|| Constants.debugMode*/) {
                           HealthSystem.play();
                           Navigator.pushAndRemoveUntil(
                             context,
@@ -218,7 +219,7 @@ class _ModeSelectionPageState extends State<ModeSelectionPage>
                             ),
                             (Route<dynamic> route) => false,
                           );
-                        } else {
+                        } else if (!canRemoveAds) {
                           AwesomeDialog(
                             btnOkText: Language.watch,
                             btnCancelText: Language.cancel,
@@ -249,8 +250,11 @@ class _ModeSelectionPageState extends State<ModeSelectionPage>
                             },
                             btnCancelOnPress: () {},
                           )..show();
-
-                          Fluttertoast.showToast(msg: Language.noHealthForGame,timeInSecForIosWeb: 3);
+                        } else {
+                          Fluttertoast.showToast(
+                            msg: Language.noHealthForGame,
+                            timeInSecForIosWeb: 3,
+                          );
                         }
                       },
                       child: Container(
@@ -294,9 +298,8 @@ class _ModeSelectionPageState extends State<ModeSelectionPage>
                     GestureDetector(
                       onTap: () {
                         Fluttertoast.showToast(
-                          msg: Language.warningMultiplayerComingSoon,
-                          timeInSecForIosWeb: 3
-                        );
+                            msg: Language.warningMultiplayerComingSoon,
+                            timeInSecForIosWeb: 3);
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(
